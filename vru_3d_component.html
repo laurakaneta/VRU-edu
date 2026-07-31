@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VRU 3D Viewer</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100%;height:100%;overflow:hidden;background:#0C1218}
+#cv{display:block;width:100%;height:100%}
+#overlay{
+  position:absolute;top:8px;left:8px;display:flex;gap:6px;flex-wrap:wrap;z-index:10;
+}
+.chip{
+  font-family:'Barlow Condensed',Arial,sans-serif;font-size:11px;letter-spacing:.10em;
+  text-transform:uppercase;background:#1B2530;border:1px solid #3E4E5F;color:#8A9AA8;
+  padding:4px 9px;border-radius:2px;cursor:pointer;transition:.14s;user-select:none;
+}
+.chip:hover{border-color:#F0A227;color:#E6EDF3}
+.chip.on{background:#3A2A0E;border-color:#F0A227;color:#F0A227}
+#hint{
+  position:absolute;bottom:6px;left:8px;z-index:10;
+  font-family:'IBM Plex Mono',monospace;font-size:9px;color:#3E4E5F;letter-spacing:.04em;
+}
+#tag-tip{
+  position:absolute;display:none;background:rgba(17,24,32,.92);border:1px solid #F0A227;
+  color:#F0A227;font-family:'IBM Plex Mono',monospace;font-size:10px;padding:4px 8px;
+  border-radius:2px;z-index:20;pointer-events:none;
+}
+</style>
+</head>
+<body>
+<canvas id="cv"></canvas>
+<div id="overlay">
+  <button class="chip on"  id="btnFlow">Flow</button>
+  <button class="chip on"  id="btnTags">Tags</button>
+  <button class="chip"     id="btnCut">Cutaway</button>
+  <button class="chip"     id="btnSpin">Auto-orbit</button>
+</div>
+<div id="hint">Left-drag: orbit · Shift/Right-drag: pan · Scroll: zoom · R: reset</div>
+<div id="tag-tip" id="tagTip"></div>
+
+<script>
+// ── Three.js loader with fallback ────────────────────────────────────────────
+(function loadThree(urls, idx) {
+  const s = document.createElement('script');
+  s.src = urls[idx];
+  s.onload = () => { if(typeof THREE !== 'undefined') initApp(); };
+  s.onerror = () => { if(idx+1 < urls.length) loadThree(urls, idx+1); };
+  document.head.appendChild(s);
+})([
+  'https://unpkg.com/three@0.128.0/build/three.min.js',
+  'https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js'
+], 0);
+</script>
+<script>
+// ── Constants ────────────────────────────────────────────────────────────────
+const CLR = {
+  steel:0x7A8794, steelDark:0x4A555F, paint:0x2E5F73, tank:0x8D9AA5,
+  gas:0x4FD1C5, liq:0xC2703F, hot:0xE4572E, warm:0xF0A227, cold:0x5B9BD5,
+  frame:0x39434D, deck:0x2A333B, flame:0xF07A22, void:0x0C1218
+};
+
+// Live state — updated via postMessage from Streamlit
+let STATE = {
+  pTankOz: 6, qCap: 200, qVent: 0, bhp: 80, td_f: 180,
+  load_pct: 100, nTank: 3, level_pct: 45, running: true, model: 'FX12V125'
+};
+
+// Scene objects
+let renderer, scene, camera, raycaster, pickables = [], labelSprites = [];
+let fanBlade, rotorA, rotorB, ventPlume, flareFlame, oilFilm;
+let particles = {}, paths = {};
+let showFlow = true, showTags = true, cutaway = false, autoSpin = false;
+const cam = { theta:0.72, phi:0.95, dist:145, tx:0, ty:9, tz:0, panX:0, panY:0 };
+
+// ── Helpers ──────────────────────────────────────────────────────────────────
+function mat(color, opts) {
+  return new THREE.MeshLambertMaterial(Object.assign({color}, opts||{}));
+}
+function vessel(dia, len, axis, color) {
+  const g = new THREE.Group();
+  const body = new THREE.Mesh(new THREE.CylinderGeometry(dia/2,dia/2,len,24), mat(color));
+  const cap1 = new THREE.Mesh(new THREE.SphereGeometry(dia/2,20,12,0,Math.PI*2,0,Math.PI/2), mat(color));
+  const cap2 = cap1.clone(); cap2.rotation.x = Math.PI;
+  cap1.position.y = len/2; cap2.position.y = -len/2;
+  g.add(body, cap1, cap2);
+  if(axis==='z') g.rotation.x = Math.PI/2;
+  if(axis==='x') g.rotation.z = Math.PI/2;
+  return g;
+}
+function pipe(a, b, r, color) {
+  const dir = new THREE.Vector3().subVectors(b, a);
+  const m = new THREE.Mesh(new THREE.CylinderGeometry(r,r,dir.length(),10), mat(color));
+  m.position.copy(a).add(b).multiplyScalar(0.5);
+  m.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0), dir.clone().normalize());
+  return m;
+}
+function polyPipe(pts, r, color, name) {
+  const g = new THREE.Group();
+  for(let i=0;i<pts.length-1;i++) g.add(pipe(pts[i], pts[i+1], r, color));
+  for(let i=1;i<pts.length-1;i++) {
+    const e = new THREE.Mesh(new THREE.SphereGeometry(r,10,8), mat(color));
+    e.position.copy(pts[i]); g.add(e);
+  }
+  g.name = name||''; return g;
+}
+function mkLabel(text, pos, tint) {
+  const c = document.createElement('canvas'); c.width=320; c.height=76;
+  const x = c.getContext('2d');
+  x.fillStyle='rgba(17,24,32,0.82)'; x.fillRect(0,0,320,76);
+  x.strokeStyle=tint||'#F0A227'; x.lineWidth=3; x.strokeRect(1.5,1.5,317,73);
+  x.fillStyle=tint||'#F0A227';
+  x.font="600 40px 'Barlow Condensed',Arial,sans-serif"; x.textAlign='center';
+  x.fillText(text,160,52);
+  const s = new THREE.Sprite(new THREE.SpriteMaterial({
+    map:new THREE.CanvasTexture(c), transparent:true, depthTest:false
+  }));
+  s.position.copy(pos); s.scale.set(11,2.6,1);
+  labelSprites.push(s);
+  return s;
+}
+function tagPart(obj, id, title) {
+  obj.traverse(o => {
+    if(o.isMesh){ o.userData.pick={id,title}; pickables.push(o); }
+  });
+}
+function V3(x,y,z){ return new THREE.Vector3(x,y,z); }
+
+// ── Build scene ──────────────────────────────────────────────────────────────
+function buildScene() {
+  const cv = document.getElementById('cv');
+  renderer = new THREE.WebGLRenderer({canvas:cv, antialias:true});
+  renderer.setClearColor(0x0C1218, 1);
+  renderer.setPixelRatio(Math.min(2, devicePixelRatio));
+
+  scene = new THREE.Scene();
+  scene.fog = new THREE.Fog(0x0C1218, 150, 330);
+  camera = new THREE.PerspectiveCamera(42, cv.clientWidth/cv.clientHeight, 1, 800);
+  raycaster = new THREE.Raycaster();
+
+  // Lights
+  scene.add(new THREE.HemisphereLight(0xBFD4E4, 0x1A2430, 0.85));
+  const key = new THREE.DirectionalLight(0xFFF1DC, 0.75);
+  key.position.set(60,90,40); scene.add(key);
+  const rim = new THREE.DirectionalLight(0x4FD1C5, 0.28);
+  rim.position.set(-70,30,-50); scene.add(rim);
+
+  // Pad & grid
+  scene.add(new THREE.Mesh(new THREE.BoxGeometry(230,0.6,150), mat(0x1A222B)));
+  const grid = new THREE.GridHelper(230,46,0x24303C,0x1B242E);
+  grid.position.y=0.05; scene.add(grid);
+
+  // ── Separator V-100 ─────────────────────────────────────────────────────
+  const sep = new THREE.Group();
+  const sv = vessel(5,20,'z',CLR.paint); sv.position.y=6; sep.add(sv);
+  [-6,6].forEach(z => {
+    const sad = new THREE.Mesh(new THREE.BoxGeometry(5,3.4,2), mat(CLR.frame));
+    sad.position.set(0,1.7,z); sep.add(sad);
+  });
+  sep.position.set(-72,0,0); scene.add(sep);
+  tagPart(sep,'V-100','V-100 · Production separator');
+  sep.add(mkLabel('V-100 SEPARATOR', V3(0,12,0),'#5B9BD5'));
+
+  // ── VR tower V-110 ──────────────────────────────────────────────────────
+  const vrt = new THREE.Group();
+  const vt = vessel(4,26,'y',CLR.paint); vt.position.y=15; vrt.add(vt);
+  const sk = new THREE.Mesh(new THREE.CylinderGeometry(2.4,2.8,2,16), mat(CLR.frame));
+  sk.position.y=1; vrt.add(sk);
+  vrt.position.set(-48,0,0); scene.add(vrt);
+  tagPart(vrt,'V-110','V-110 · Vapour recovery tower');
+  vrt.add(mkLabel('V-110 VRT', V3(0,31,0),'#5B9BD5'));
+
+  // ── Stock tank battery (up to 6) ────────────────────────────────────────
+  const tankZ = [-45,-27,-9,9,27,45];
+  const tanks = [];
+  const hdrY = 19.5;
+  tankZ.forEach((tz, i) => {
+    const g = new THREE.Group();
+    const shell = new THREE.Mesh(
+      new THREE.CylinderGeometry(7.75,7.75,16,30,1,true),
+      mat(CLR.tank,{side:THREE.DoubleSide})
+    );
+    shell.position.y=8; g.add(shell);
+    const roof = new THREE.Mesh(new THREE.ConeGeometry(7.9,1.6,30), mat(CLR.steelDark));
+    roof.position.y=16.8; g.add(roof);
+    // liquid level mesh - scaled at runtime
+    const liq = new THREE.Mesh(
+      new THREE.CylinderGeometry(7.6,7.6,1,26),
+      mat(CLR.liq,{transparent:true,opacity:0.9})
+    );
+    liq.name='liquid'; g.add(liq);
+    // thief hatch
+    const hatch = new THREE.Mesh(new THREE.CylinderGeometry(0.7,0.7,1.1,12), mat(CLR.warm));
+    hatch.position.set(4.4,17.4,0); g.add(hatch);
+    // PVRV
+    const pvrv = new THREE.Mesh(new THREE.CylinderGeometry(0.55,0.8,1.8,12), mat(CLR.steel));
+    pvrv.position.set(-3.6,18,0); g.add(pvrv);
+    // stairs
+    for(let s=0;s<9;s++){
+      const st = new THREE.Mesh(new THREE.BoxGeometry(2.4,0.16,0.9), mat(CLR.frame));
+      st.position.set(8.6, 1.6+s*1.7, -3+s*0.55); g.add(st);
+    }
+    // riser into vapour header
+    g.add(pipe(V3(0.2,18,0), V3(-3.6,hdrY,0), 0.4, CLR.gas));
+    g.position.set(-16,0,tz);
+    scene.add(g); tanks.push(g);
+    tagPart(g,'TK-20'+(i+1),'TK-20'+(i+1)+' · Crude stock tank');
+    if(i===2) g.add(mkLabel('TK-203 STOCK TANK', V3(0,22,0),'#C2703F'));
+  });
+  scene.userData.tanks = tanks;
+
+  // ── Vapour header & suction piping ──────────────────────────────────────
+  const hdr = polyPipe([V3(-19.6,hdrY,-45),V3(-19.6,hdrY,45)], 0.55, CLR.gas, 'hdr');
+  scene.add(hdr);
+  tagPart(hdr,'L-100','L-100 · Tank vapour header');
+  const suct = polyPipe([
+    V3(-19.6,hdrY,0), V3(10,hdrY,0), V3(10,6.5,0), V3(24,6.5,0)
+  ], 0.55, CLR.gas, 'suction');
+  scene.add(suct);
+  tagPart(suct,'L-101','L-101 · Vapour suction header');
+
+  // Liquid runs
+  scene.add(polyPipe([V3(-72,4,7),V3(-72,4,14),V3(-48,4,14),V3(-48,4,0)], 0.42, CLR.liq));
+  scene.add(polyPipe([V3(-48,3,0),V3(-36,3,0),V3(-36,3,-20),V3(-23,3,-20)], 0.42, CLR.liq));
+  scene.add(polyPipe([V3(-72,9,0),V3(-72,26,0),V3(-72,26,-46)], 0.45, 0x6E7C88));
+
+  // ── VRU Skid ────────────────────────────────────────────────────────────
+  const skid = new THREE.Group();
+  const deck = new THREE.Mesh(new THREE.BoxGeometry(20,0.7,44), mat(CLR.deck));
+  deck.position.y=1.6; skid.add(deck);
+  for(let i=-1;i<=1;i+=2) for(let j=-1;j<=1;j+=2){
+    const beam = new THREE.Mesh(new THREE.BoxGeometry(1.1,1.6,1.1), mat(CLR.frame));
+    beam.position.set(i*9,0.8,j*21); skid.add(beam);
+  }
+
+  // Inlet scrubber V-201
+  const scr = new THREE.Group();
+  const scrShell = vessel(4.4,12,'y',CLR.paint); scrShell.position.y=8; scr.add(scrShell);
+  const sight = new THREE.Mesh(new THREE.CylinderGeometry(0.3,0.3,3.4,10),
+    mat(CLR.liq,{transparent:true,opacity:0.75}));
+  sight.position.set(2.3,4.4,0); scr.add(sight);
+  scr.position.set(-4,2,-15); skid.add(scr);
+  tagPart(scr,'V-201','V-201 · Inlet scrubber');
+
+  // Screw compressor C-301
+  const comp = new THREE.Group();
+  const cbody = new THREE.Mesh(new THREE.CylinderGeometry(3.1,3.1,12,20), mat(CLR.steelDark));
+  cbody.rotation.z=Math.PI/2; cbody.position.y=4.6; cbody.name='case'; comp.add(cbody);
+  const inletFl = new THREE.Mesh(new THREE.CylinderGeometry(1.5,1.5,1.1,14), mat(CLR.steel));
+  inletFl.position.set(-6.4,5.6,0); inletFl.rotation.z=Math.PI/2; comp.add(inletFl);
+  rotorA = new THREE.Mesh(new THREE.CylinderGeometry(1.55,1.55,11.2,5), mat(0xB98F4A));
+  rotorA.rotation.z=Math.PI/2; rotorA.position.set(0,5.6,-1.35); comp.add(rotorA);
+  rotorB = new THREE.Mesh(new THREE.CylinderGeometry(1.35,1.35,11.2,6), mat(0x9E7A3F));
+  rotorB.rotation.z=Math.PI/2; rotorB.position.set(0,3.9,1.2); comp.add(rotorB);
+  oilFilm = new THREE.Mesh(new THREE.CylinderGeometry(3.14,3.14,12,20,1,true),
+    mat(CLR.warm,{transparent:true,opacity:0}));
+  oilFilm.rotation.z=Math.PI/2; oilFilm.position.y=4.6; comp.add(oilFilm);
+  comp.position.set(-2,2,-1); skid.add(comp);
+  tagPart(comp,'C-301','C-301 · Rotary screw compressor');
+
+  // Driver M-301
+  const drv = new THREE.Group();
+  const dbody = new THREE.Mesh(new THREE.CylinderGeometry(2.9,2.9,9,20), mat(CLR.paint));
+  dbody.rotation.z=Math.PI/2; dbody.position.y=4.6; drv.add(dbody);
+  for(let i=0;i<10;i++){
+    const fin = new THREE.Mesh(new THREE.TorusGeometry(2.95,0.14,6,18), mat(CLR.steelDark));
+    fin.rotation.y=Math.PI/2; fin.position.set(-4+i*0.9,4.6,0); drv.add(fin);
+  }
+  const jbox = new THREE.Mesh(new THREE.BoxGeometry(1.8,1.6,1.6), mat(0x2A3038));
+  jbox.position.set(0,7.6,0); drv.add(jbox);
+  drv.position.set(-2,2,11); skid.add(drv);
+  tagPart(drv,'M-301','M-301 · Driver (motor/engine)');
+  drv.add(mkLabel('C-301 / M-301', V3(0,12,0),'#4FD1C5'));
+
+  // Oil separator V-302
+  const oil = new THREE.Group();
+  const ov = vessel(3.6,9,'y',0x6B5A34); ov.position.y=6.5; oil.add(ov);
+  oil.position.set(6,2,-6); skid.add(oil);
+  tagPart(oil,'V-302','V-302 · Oil separator / reservoir');
+
+  // Aftercooler E-401 with fan
+  const ac = new THREE.Group();
+  const core = new THREE.Mesh(new THREE.BoxGeometry(15,2.2,11), mat(0x4A5A66));
+  core.position.y=12; ac.add(core);
+  for(let i=0;i<22;i++){
+    const t = new THREE.Mesh(new THREE.CylinderGeometry(0.16,0.16,14.6,8), mat(0x93744A));
+    t.rotation.z=Math.PI/2; t.position.set(0,12,-5+i*0.48); ac.add(t);
+  }
+  const shroud = new THREE.Mesh(new THREE.CylinderGeometry(4.6,4.6,2,24,1,true),
+    mat(CLR.steelDark,{side:THREE.DoubleSide}));
+  shroud.position.y=14.6; ac.add(shroud);
+  fanBlade = new THREE.Group();
+  for(let b=0;b<6;b++){
+    const bl = new THREE.Mesh(new THREE.BoxGeometry(4.2,0.14,1.15), mat(0x33608A));
+    bl.position.set(Math.cos(b*Math.PI/3)*2.2,0,Math.sin(b*Math.PI/3)*2.2);
+    bl.rotation.y=-b*Math.PI/3; bl.rotation.x=0.42; fanBlade.add(bl);
+  }
+  fanBlade.position.y=14.8; ac.add(fanBlade);
+  for(let i=-1;i<=1;i+=2){
+    const leg = new THREE.Mesh(new THREE.BoxGeometry(0.5,9.6,0.5), mat(CLR.frame));
+    leg.position.set(i*6.5,6.8,0); ac.add(leg);
+  }
+  ac.position.set(0,2,18); skid.add(ac);
+  tagPart(ac,'E-401','E-401 · Discharge aftercooler');
+  ac.add(mkLabel('E-401 AFTERCOOLER', V3(0,20,0),'#5B9BD5'));
+
+  // Skid internal piping
+  skid.add(polyPipe([V3(-4,10,-15),V3(-4,10,-6),V3(-8.4,10,-6),V3(-8.4,7.6,-1)], 0.45, CLR.gas));
+  const disch = polyPipe([
+    V3(4.5,7.6,-1),V3(8,7.6,-1),V3(8,7.6,-6),
+    V3(8,13.5,-6),V3(8,13.5,13),V3(0,13.5,13)
+  ], 0.45, CLR.hot, 'disch');
+  skid.add(disch);
+  tagPart(disch,'L-301','L-301 · Compressor discharge');
+
+  skid.position.set(38,0,0); scene.add(skid);
+  scene.userData.skid = skid;
+
+  // Sales line
+  const sales = polyPipe([
+    V3(38,15.5,21),V3(38,15.5,40),V3(88,15.5,40)
+  ], 0.5, CLR.gas, 'sales');
+  scene.add(sales);
+  tagPart(sales,'L-501','L-501 · Residue gas to sales');
+  sales.add(mkLabel('TO SALES', V3(74,19,40),'#4FD1C5'));
+
+  // Flare / enclosed combustor FL-601
+  const flare = new THREE.Group();
+  const stack = new THREE.Mesh(new THREE.CylinderGeometry(1.5,1.9,40,16), mat(CLR.steelDark));
+  stack.position.y=20; flare.add(stack);
+  flareFlame = new THREE.Mesh(new THREE.ConeGeometry(1.9,8,14),
+    mat(CLR.flame,{transparent:true,opacity:0}));
+  flareFlame.position.y=44; flare.add(flareFlame);
+  flare.position.set(86,0,-34); scene.add(flare);
+  tagPart(flare,'FL-601','FL-601 · Enclosed combustor / flare');
+  flare.add(mkLabel('FL-601 FLARE', V3(0,48,0),'#E4572E'));
+
+  // Vent plume particles
+  const pg = new THREE.BufferGeometry();
+  const pn=240, pp=new Float32Array(pn*3);
+  for(let i=0;i<pn;i++){
+    pp[i*3]  = -11.6+(Math.random()-0.5)*3;
+    pp[i*3+1]= 18+Math.random()*26;
+    pp[i*3+2]= -9+(Math.random()-0.5)*3;
+  }
+  pg.setAttribute('position', new THREE.BufferAttribute(pp,3));
+  ventPlume = new THREE.Points(pg,
+    new THREE.PointsMaterial({color:0xE4572E,size:0.9,transparent:true,opacity:0}));
+  scene.add(ventPlume);
+
+  // Flow particle stream paths
+  paths = {
+    liq1: [V3(-72,4,7),V3(-72,4,14),V3(-48,4,14),V3(-48,4,0)],
+    liq2: [V3(-48,3,0),V3(-36,3,0),V3(-36,3,-20),V3(-23,3,-20)],
+    vap:  [V3(-19.6,19.5,-45),V3(-19.6,19.5,0),V3(10,19.5,0),
+           V3(10,6.5,0),V3(34,6.5,-15),V3(34,12,-15),V3(34,12,-7),V3(29.6,9.6,-1)],
+    dsch: [V3(42.5,9.6,-1),V3(46,9.6,-6),V3(46,15.5,7),
+           V3(38,15.5,21),V3(38,15.5,40),V3(88,15.5,40)],
+    sepg: [V3(-72,9,0),V3(-72,26,0),V3(-72,26,-46)]
+  };
+  const streamCfg = {
+    liq1:{n:70,c:CLR.liq,  s:0.85},
+    liq2:{n:70,c:CLR.liq,  s:0.85},
+    vap: {n:200,c:CLR.gas, s:0.80},
+    dsch:{n:200,c:CLR.warm,s:0.80},
+    sepg:{n:90, c:0x8894A0,s:0.70}
+  };
+  Object.keys(streamCfg).forEach(key => {
+    const cfg = streamCfg[key];
+    const geo = new THREE.BufferGeometry();
+    const arr = new Float32Array(cfg.n*3);
+    geo.setAttribute('position', new THREE.BufferAttribute(arr,3));
+    const pts = new THREE.Points(geo,
+      new THREE.PointsMaterial({color:cfg.c,size:cfg.s,transparent:true,opacity:0.95}));
+    scene.add(pts);
+    particles[key] = {
+      pts, arr, n:cfg.n,
+      t: Array.from({length:cfg.n}, ()=>Math.random()),
+      mat: pts.material
+    };
+  });
+}
+
+// ── Camera & resize ──────────────────────────────────────────────────────────
+function resize() {
+  const w = window.innerWidth, h = window.innerHeight;
+  renderer.setSize(w, h, false);
+  camera.aspect = w / Math.max(1, h);
+  camera.updateProjectionMatrix();
+}
+function applyCam() {
+  const tx = cam.tx + cam.panX, ty = cam.ty + cam.panY, tz = cam.tz;
+  camera.position.set(
+    tx + cam.dist*Math.cos(cam.phi)*Math.sin(cam.theta),
+    ty + cam.dist*Math.sin(cam.phi),
+    tz + cam.dist*Math.cos(cam.phi)*Math.cos(cam.theta)
+  );
+  camera.lookAt(tx, ty, tz);
+}
+function bindCam(cv) {
+  let drag=false, lx=0, ly=0, moved=0, isPan=false;
+  cv.addEventListener('pointerdown', e => {
+    drag=true; moved=0; lx=e.clientX; ly=e.clientY;
+    isPan = e.button===2 || e.button===1 || e.shiftKey;
+    cv.setPointerCapture(e.pointerId);
+  });
+  cv.addEventListener('pointerup', e => {
+    drag=false;
+    if(moved < 5) doPick(e);
+  });
+  cv.addEventListener('pointermove', e => {
+    if(!drag) return;
+    const dx=e.clientX-lx, dy=e.clientY-ly; lx=e.clientX; ly=e.clientY;
+    moved += Math.abs(dx)+Math.abs(dy);
+    if(isPan){ cam.panX -= dx*0.15; cam.panY += dy*0.15; }
+    else {
+      cam.theta -= dx*0.006;
+      cam.phi = Math.max(0.12, Math.min(1.52, cam.phi - dy*0.005));
+    }
+  });
+  cv.addEventListener('wheel', e => {
+    e.preventDefault();
+    cam.dist = Math.max(38, Math.min(320, cam.dist*(1+Math.sign(e.deltaY)*0.09)));
+  }, {passive:false});
+  cv.addEventListener('contextmenu', e => e.preventDefault());
+}
+function doPick(e) {
+  const cv = renderer.domElement;
+  const r = cv.getBoundingClientRect();
+  const m = new THREE.Vector2(
+    ((e.clientX-r.left)/r.width)*2-1,
+    -((e.clientY-r.top)/r.height)*2+1
+  );
+  raycaster.setFromCamera(m, camera);
+  const hit = raycaster.intersectObjects(pickables, false)[0];
+  const tip = document.getElementById('tag-tip');
+  if(hit && hit.object.userData.pick) {
+    const d = hit.object.userData.pick;
+    tip.textContent = d.id + ' · ' + d.title;
+    tip.style.display = 'block';
+    tip.style.left = (e.clientX+10)+'px';
+    tip.style.top  = (e.clientY-20)+'px';
+    setTimeout(()=>{ tip.style.display='none'; }, 2500);
+  }
+}
+
+// ── Particle stream animation ────────────────────────────────────────────────
+function pathPoint(pts, t) {
+  const segs = pts.length-1;
+  const u = Math.min(0.9999, Math.max(0, t))*segs;
+  const i = Math.floor(u), frac = u-i;
+  return new THREE.Vector3().lerpVectors(pts[i], pts[Math.min(segs,i+1)], frac);
+}
+function updateStream(key, speed, opacity) {
+  const s = particles[key], pts = paths[key];
+  s.mat.opacity = (showFlow && STATE.running) ? opacity : 0;
+  for(let i=0;i<s.n;i++){
+    s.t[i] += speed;
+    if(s.t[i]>1) s.t[i]-=1;
+    const p = pathPoint(pts, s.t[i]);
+    s.arr[i*3]=p.x; s.arr[i*3+1]=p.y; s.arr[i*3+2]=p.z;
+  }
+  s.pts.geometry.attributes.position.needsUpdate = true;
+}
+
+// ── Per-frame scene update ───────────────────────────────────────────────────
+function update3d(dt) {
+  const msMax = {VRX25:150, FX12V125:750, FX12G:750, FX20V300:2000}[STATE.model]||750;
+
+  // Tank count & liquid level
+  (scene.userData.tanks||[]).forEach((g,i) => {
+    g.visible = i < STATE.nTank;
+    const liq = g.getObjectByName('liquid');
+    if(liq){
+      const h = Math.max(0.4, 16*STATE.level_pct/100);
+      liq.scale.y = h; liq.position.y = h/2;
+    }
+  });
+
+  // Rotor & fan spin
+  const rpmFrac = STATE.running ? STATE.load_pct/100 : 0;
+  const w = rpmFrac * 3550/60 * dt * 2*Math.PI;
+  if(rotorA) rotorA.rotation.y += w*0.06;
+  if(rotorB) rotorB.rotation.y -= w*0.06*(5/6);
+  if(fanBlade) fanBlade.rotation.y += STATE.running ? 0.09+0.16*rpmFrac : 0;
+
+  // Oil film visibility in cutaway mode
+  if(oilFilm) oilFilm.material.opacity = cutaway ? 0.45 : 0;
+
+  // Discharge pipe colour: cool gas → hot
+  const warm = Math.max(0, Math.min(1, (STATE.td_f - 90)/260));
+  const dc = new THREE.Color(CLR.gas).lerp(new THREE.Color(CLR.hot), warm);
+  const skid = scene.userData.skid;
+  if(skid){
+    const d = skid.getObjectByName('disch');
+    if(d) d.traverse(o => { if(o.isMesh) o.material.color.copy(dc); });
+  }
+  if(particles.dsch) particles.dsch.mat.color.copy(dc);
+
+  // Vent plume
+  if(ventPlume){
+    const venting = STATE.qVent > 0.05;
+    ventPlume.material.opacity = venting ? Math.min(0.85, 0.25+STATE.qVent/400) : 0;
+    if(venting){
+      const pos = ventPlume.geometry.attributes.position;
+      for(let i=0;i<pos.count;i++){
+        let y = pos.getY(i) + 0.22 + STATE.qVent/900;
+        if(y>46) y=18;
+        pos.setY(i,y);
+      }
+      pos.needsUpdate = true;
+    }
+  }
+
+  // Flare flame
+  if(flareFlame){
+    const on = STATE.qVent > 0.05;
+    flareFlame.material.opacity = on ? 0.55+0.25*Math.sin(performance.now()/90) : 0;
+    flareFlame.scale.setScalar(on ? 0.7+Math.min(1.6,STATE.qVent/300) : 0.01);
+  }
+
+  // Flow streams
+  const cap = STATE.qCap;
+  updateStream('vap',  0.0012+0.010*Math.min(1,cap/msMax), 0.95);
+  updateStream('dsch', 0.0012+0.010*Math.min(1,cap/msMax), 0.95);
+  updateStream('liq1', 0.0010+0.006*Math.min(1,1), 0.9);
+  updateStream('liq2', 0.0010+0.006*Math.min(1,1), 0.9);
+  updateStream('sepg', 0.0010+0.008, 0.55);
+
+  // Labels
+  labelSprites.forEach(s => s.visible = showTags);
+
+  // Cutaway: make compressor case semi-transparent
+  if(skid){
+    skid.traverse(o => {
+      if(o.isMesh && o.name==='case'){
+        o.material.transparent = cutaway;
+        o.material.opacity = cutaway ? 0.18 : 1;
+      }
+    });
+  }
+}
+
+// ── Main loop ────────────────────────────────────────────────────────────────
+let lastT = 0;
+function frame(now) {
+  const dt = Math.min(0.1, (now-lastT)/1000); lastT=now;
+  if(autoSpin) cam.theta += 0.0016;
+  applyCam();
+  update3d(dt);
+  renderer.render(scene, camera);
+  requestAnimationFrame(frame);
+}
+
+// ── postMessage from Streamlit ───────────────────────────────────────────────
+window.addEventListener('message', e => {
+  try {
+    const d = (typeof e.data === 'string') ? JSON.parse(e.data) : e.data;
+    if(d && d.vru) Object.assign(STATE, d.vru);
+  } catch(_){}
+});
+
+// ── Button wiring ────────────────────────────────────────────────────────────
+function tog(id, getVal, setVal) {
+  document.getElementById(id).addEventListener('click', () => {
+    setVal(!getVal());
+    document.getElementById(id).classList.toggle('on', getVal());
+  });
+}
+
+// ── Boot ─────────────────────────────────────────────────────────────────────
+function initApp() {
+  buildScene();
+  resize();
+  window.addEventListener('resize', resize);
+  const cv = renderer.domElement;
+  bindCam(cv);
+
+  tog('btnFlow', ()=>showFlow, v=>{showFlow=v;});
+  tog('btnTags', ()=>showTags, v=>{showTags=v;});
+  tog('btnCut',  ()=>cutaway,  v=>{cutaway=v;});
+  tog('btnSpin', ()=>autoSpin, v=>{autoSpin=v;});
+
+  document.addEventListener('keydown', e => {
+    if(e.key.toLowerCase()==='r'){ cam.panX=0; cam.panY=0; cam.theta=0.72; cam.phi=0.95; cam.dist=145; }
+  });
+
+  requestAnimationFrame(t => { lastT=t; frame(t); });
+}
+</script>
+</body>
+</html>
+
