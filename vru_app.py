@@ -208,13 +208,34 @@ FEED_DEFAULT = {"N2":0.25,"CO2":0.85,"C1":28.0,"C2":8.5,"C3":6.0,
                 "iC4":1.1,"nC4":2.8,"iC5":1.1,"nC5":1.4,"C6":1.8,"C7+":48.2}
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Unit models
+# Unit models  (confirmed vs flowco-inc.com, July 2026)
+# ─────────────────────────────────────────────────────────────────────────────
+# Fields:
+#   hp        — nameplate motor/engine horsepower
+#   driver    — "electric" or "gas"
+#   pdMax     — maximum discharge pressure (psig)
+#   rpmRated  — rated shaft speed (rpm) — representative; actual varies by gear ratio
+#   disp      — rotor displacement (ft³/rev) — representative for this frame
+#   Vi        — built-in volume ratio — nominal for standard rotor set
+#   oilGpm    — oil circulation rate (gpm)
+#   msMax     — rated maximum capacity (MSCFD) at rated conditions
 # ─────────────────────────────────────────────────────────────────────────────
 MODELS = {
-    "VRX25":    {"label":"VRX25",    "hp":25,  "driver":"electric", "pdMax":230, "rpmRated":1750, "disp":0.0884, "Vi":2.6, "oilGpm":4,  "msMax":150},
-    "FX12V125": {"label":"FX12V125", "hp":125, "driver":"electric", "pdMax":350, "rpmRated":3550, "disp":0.1612, "Vi":3.5, "oilGpm":12, "msMax":750},
-    "FX12G":    {"label":"FX12 gas", "hp":135, "driver":"gas",      "pdMax":350, "rpmRated":1800, "disp":0.3176, "Vi":3.5, "oilGpm":12, "msMax":750},
-    "FX20V300": {"label":"FX20V300", "hp":300, "driver":"electric", "pdMax":350, "rpmRated":3550, "disp":0.4100, "Vi":4.0, "oilGpm":22, "msMax":2000},
+    # ── VRX Electric Series — marginal-well, 230 psig ──────────────────────
+    "VRX7":     {"label":"VRX7 (7.5 hp)",       "hp":7.5,  "driver":"electric", "pdMax":230, "rpmRated":3550, "disp":0.0210, "Vi":2.2, "oilGpm":1.5, "msMax":40},
+    "VRX15":    {"label":"VRX15 (15 hp)",        "hp":15,   "driver":"electric", "pdMax":230, "rpmRated":3550, "disp":0.0440, "Vi":2.4, "oilGpm":2.5, "msMax":75},
+    "VRX25":    {"label":"VRX25 (25 hp)",        "hp":25,   "driver":"electric", "pdMax":230, "rpmRated":1750, "disp":0.0884, "Vi":2.6, "oilGpm":4,   "msMax":170},   # was 150 — corrected
+    # ── FX Electric Series — 350 psig ─────────────────────────────────────
+    "FX10V75":  {"label":"FX10V75 (75 hp)",      "hp":75,   "driver":"electric", "pdMax":350, "rpmRated":3550, "disp":0.0920, "Vi":3.2, "oilGpm":8,   "msMax":450},
+    "FX12V125": {"label":"FX12V125 (75/125 hp)", "hp":125,  "driver":"electric", "pdMax":350, "rpmRated":3550, "disp":0.1612, "Vi":3.5, "oilGpm":12,  "msMax":850},   # was 750 — corrected
+    "FX17V150": {"label":"FX17V150 (150 hp)",    "hp":150,  "driver":"electric", "pdMax":350, "rpmRated":3550, "disp":0.2600, "Vi":3.8, "oilGpm":16,  "msMax":1200},
+    "FX20V300": {"label":"FX20V300 (300 hp)",    "hp":300,  "driver":"electric", "pdMax":350, "rpmRated":3550, "disp":0.4100, "Vi":4.0, "oilGpm":22,  "msMax":2000},
+    # ── FX Gas Engine Series ───────────────────────────────────────────────
+    "FX8G":     {"label":"FX8 gas (72 hp)",      "hp":72,   "driver":"gas",      "pdMax":230, "rpmRated":1800, "disp":0.0920, "Vi":2.8, "oilGpm":6,   "msMax":150},
+    "FX10G":    {"label":"FX10 gas (92 hp)",     "hp":92,   "driver":"gas",      "pdMax":350, "rpmRated":1800, "disp":0.1600, "Vi":3.2, "oilGpm":8,   "msMax":450},
+    "FX12G":    {"label":"FX12 gas (92/135 hp)", "hp":135,  "driver":"gas",      "pdMax":350, "rpmRated":1800, "disp":0.3176, "Vi":3.5, "oilGpm":12,  "msMax":750},
+    "FX17G":    {"label":"FX17 gas (188 hp)",    "hp":188,  "driver":"gas",      "pdMax":350, "rpmRated":1800, "disp":0.4200, "Vi":3.8, "oilGpm":18,  "msMax":1200},
+    "FX20G":    {"label":"FX20 gas (276 hp)",    "hp":276,  "driver":"gas",      "pdMax":350, "rpmRated":1800, "disp":0.5800, "Vi":4.0, "oilGpm":22,  "msMax":2000},
 }
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -674,6 +695,7 @@ with st.sidebar:
         ("🏗️", "3D View",        "3d"),
         ("🏠", "Dashboard",      "dashboard"),
         ("🎛️", "Simulator",      "simulator"),
+        ("🎛️", "Control System", "controls"),
         ("📐", "Equations",      "equations"),
         ("📚", "Guided Lessons", "lessons"),
         ("📖", "Glossary",       "glossary"),
@@ -822,139 +844,210 @@ def page_dashboard():
 # ─────────────────────────────────────────────────────────────────────────────
 def page_simulator():
     st.title("🎛️ Simulator")
-    st.caption("Adjust every plant parameter. Results update live.")
 
-    # ── Top controls ──
-    col_a, col_b, col_c = st.columns(3)
-    with col_a:
-        model = st.selectbox("Unit Model", list(MODELS.keys()),
-                             index=list(MODELS.keys()).index(p["model"]),
-                             format_func=lambda k: MODELS[k]["label"])
-        if model != p["model"]:
-            p["model"] = model
-            M = MODELS[model]
-            p["disp"] = M["disp"]; p["Vi"] = M["Vi"]; p["oilGpm"] = M["oilGpm"]
-    with col_b:
-        use_real = st.toggle("Peng-Robinson EOS", value=p["use_real"])
-        p["use_real"] = use_real
-    with col_c:
+    # ── Guided / Expert mode toggle ──────────────────────────────────────────
+    mode_col, _, run_col = st.columns([2, 3, 2])
+    with mode_col:
+        sim_mode = st.radio("Mode", ["🟢 Guided", "⚙️ Expert"], horizontal=True,
+                            key="sim_mode",
+                            help="Guided: 8 key controls only. Expert: every parameter.")
+    with run_col:
         running = st.toggle("Compressor Running", value=p["running"])
         p["running"] = running
 
-    # ── Parameter tabs ──
-    tabs = st.tabs(["🛢️ Source & Tank", "🔩 Compressor", "🌡️ Thermal & Control",
-                    "🔥 Combustion", "💰 Economics", "⚗️ Composition"])
+    guided = sim_mode == "🟢 Guided"
 
-    # ── Tab 0: Source & Tank ──
-    with tabs[0]:
-        c1, c2 = st.columns(2)
-        with c1:
-            sec("Well Stream & Separator")
-            p["qLiq"]   = st.slider("Well-stream liquid (bbl/d)", 50, 30000, int(p["qLiq"]), 50)
-            p["api"]    = st.slider("Stock-tank oil gravity (°API)", 22.0, 48.0, float(p["api"]), 0.5)
-            p["pSep"]   = st.slider("Separator pressure (psig)", 15, 250, int(p["pSep"]), 1)
-            p["tSep"]   = st.slider("Separator temperature (°F)", 60, 160, int(p["tSep"]), 1)
-            p["tTank"]  = st.slider("Tank liquid temperature (°F)", 50, 130, int(p["tTank"]), 1)
-            p["dTdiur"] = st.slider("Diurnal vapour-space swing (°F)", 0, 50, int(p["dTdiur"]), 1)
-            p["qBlank"] = st.slider("Blanket / gas-lift leak-in (MSCFD)", 0, 120, int(p["qBlank"]), 1)
-        with c2:
-            sec("Tank Battery Geometry")
-            p["nTank"]  = st.slider("Number of stock tanks", 1, 6, int(p["nTank"]), 1)
-            p["dTank"]  = st.slider("Tank diameter (ft)", 8.0, 24.0, float(p["dTank"]), 0.5)
-            p["hTank"]  = st.slider("Tank shell height (ft)", 8.0, 32.0, float(p["hTank"]), 0.5)
-            p["level"]  = st.slider("Average liquid level (%)", 5, 90, int(p["level"]), 1)
-            p["turnKn"] = st.slider("Turnover factor K_N", 0.20, 1.00, float(p["turnKn"]), 0.01)
-            p["prodKp"] = st.slider("Product factor K_P", 0.50, 1.00, float(p["prodKp"]), 0.01)
-            p["ventKe"] = st.slider("Breathing-loss multiplier", 0.0, 3.0, float(p["ventKe"]), 0.05)
-            p["pPvrv"]  = st.slider("Thief hatch / PVRV pop (oz)", 6.0, 40.0, float(p["pPvrv"]), 0.5)
-            p["pVac"]   = st.slider("Vacuum breaker setting (oz)", -12.0, -1.0, float(p["pVac"]), 0.5)
-            p["pTankOz"]= st.slider("Tank pressure (oz)", -10.0, 30.0, float(p["pTankOz"]), 0.25)
-
-    # ── Tab 1: Compressor ──
-    with tabs[1]:
-        c1, c2 = st.columns(2)
-        with c1:
-            sec("Screw Geometry & Internals")
-            p["disp"]   = st.slider("Rotor displacement (ft³/rev)", 0.02, 0.80, float(p["disp"]), 0.002)
-            p["Vi"]     = st.slider("Built-in volume ratio Vᵢ", 1.6, 5.5, float(p["Vi"]), 0.05)
-            p["kSlip"]  = st.slider("Clearance slip coefficient", 0.0, 6.0, float(p["kSlip"]), 0.05)
-            p["load"]   = st.slider("Speed / load (%)", 0.0, 100.0, float(p["load"]), 1.0)
-        with c2:
-            sec("Performance & Oil System")
-            p["etaIs"]  = st.slider("Baseline isentropic efficiency", 0.45, 0.90, float(p["etaIs"]), 0.005)
-            p["mechL"]  = st.slider("Mechanical / bearing loss", 0.01, 0.12, float(p["mechL"]), 0.005)
-            p["oilGpm"] = st.slider("Injected oil circulation (gpm)", 0.0, 40.0, float(p["oilGpm"]), 0.5)
-            p["tOil"]   = st.slider("Oil inlet temperature (°F)", 90, 210, int(p["tOil"]), 1)
-            p["cpOil"]  = st.slider("Oil specific heat (Btu/lb·°F)", 0.35, 0.60, float(p["cpOil"]), 0.005)
-            p["dpSuct"] = st.slider("Suction line + scrubber loss (oz)", 0.0, 24.0, float(p["dpSuct"]), 0.5)
-            p["pSales"] = st.slider("Sales / discharge pressure (psig)", 20, 400, int(p["pSales"]), 5)
-
-    # ── Tab 2: Thermal & Control ──
-    with tabs[2]:
-        c1, c2 = st.columns(2)
-        with c1:
-            sec("Aftercooler")
-            p["uaCool"]  = st.slider("Aftercooler UA (Btu/hr·°F)", 200, 9000, int(p["uaCool"]), 50)
-            p["tAir"]    = st.slider("Ambient air temperature (°F)", -10, 120, int(p["tAir"]), 1)
-            p["scrubEff"]= st.slider("Inlet scrubber separation (%)", 80.0, 100.0, float(p["scrubEff"]), 0.1)
-        with c2:
-            sec("Pressure Setpoint")
-            p["pSet"]    = st.slider("Suction pressure setpoint (oz)", -2.0, 24.0, float(p["pSet"]), 0.25)
-            p["cvVent"]  = st.slider("PVRV relief coefficient", 50, 1200, int(p["cvVent"]), 10)
-            p["cvVac"]   = st.slider("Vacuum breaker capacity (MSCFD/√oz)", 20, 2000, int(p["cvVac"]), 20)
-
-    # ── Tab 3: Combustion ──
-    with tabs[3]:
-        c1, c2 = st.columns(2)
-        with c1:
-            sec("Engine / Burner")
-            p["lambda"]  = st.slider("Excess-air ratio λ", 1.0, 2.2, float(p["lambda"]), 0.01)
-            p["bsfc"]    = st.slider("Driver heat rate BSFC (Btu/bhp·hr)", 6000, 12000, int(p["bsfc"]), 50)
-            p["tIntake"] = st.slider("Combustion air inlet temperature (°F)", 40, 180, int(p["tIntake"]), 1)
-            p["mnReq"]   = st.slider("Engine methane-number requirement", 30, 80, int(p["mnReq"]), 1)
-        with c2:
-            sec("Emissions")
-            p["slipPct"] = st.slider("Engine methane slip (% of fuel)", 0.0, 4.0, float(p["slipPct"]), 0.05)
-            p["dre"]     = st.slider("Flare destruction efficiency (%)", 90.0, 99.9, float(p["dre"]), 0.1)
-            p["gwp"]     = st.slider("Methane GWP (100-yr)", 20, 86, int(p["gwp"]), 1)
-
-    # ── Tab 4: Economics ──
-    with tabs[4]:
-        c1, c2 = st.columns(2)
-        with c1:
-            sec("Revenue")
-            p["pxGas"]   = st.slider("Residue gas price ($/Mcf)", 0.5, 12.0, float(p["pxGas"]), 0.05)
-            p["pxNgl"]   = st.slider("Condensate / NGL price ($/bbl)", 5, 90, int(p["pxNgl"]), 1)
-        with c2:
-            sec("Operating Cost")
-            p["pxKwh"]   = st.slider("Electricity price ($/kWh)", 0.02, 0.30, float(p["pxKwh"]), 0.005)
-            p["etaMot"]  = st.slider("Motor + drive efficiency", 0.80, 0.98, float(p["etaMot"]), 0.005)
-            p["rent"]    = st.slider("Package rental rate ($/month)", 0, 30000, int(p["rent"]), 250)
-            p["co2Tax"]  = st.slider("Methane fee / carbon value ($/tonne CO₂e)", 0, 200, int(p["co2Tax"]), 5)
-
-    # ── Tab 5: Composition ──
-    with tabs[5]:
-        sec("Well-Stream Composition (mole %)")
-        st.caption("Drag freely — values are normalised internally.")
-        cols = st.columns(3)
-        for i, comp in enumerate(COMPS):
-            with cols[i % 3]:
-                feed_pct[i] = st.slider(
-                    f"{comp['id']} — {comp['name']}",
-                    0.0, 80.0, float(feed_pct[i]), 0.05,
-                    key=f"comp_{i}"
-                )
-        z = normalize(feed_pct)
-        tot = sum(feed_pct)
-        st.caption(f"Entered total: {f(tot,2)} mol%  ·  Vapour MW: **{f(mix_mw(normalize(feed_pct)),1)}** lb/lbmol  ·  SG: **{f(mix_sg(z),3)}**")
+    if guided:
+        st.caption("Guided mode — the 8 parameters that drive 90% of outcomes. Master these first.")
+    else:
+        st.caption("Expert mode — every plant parameter exposed. Use the tabs below.")
 
     st.divider()
 
-    # ── Live results ──
+    # ── Model selector (always visible) ─────────────────────────────────────
+    model_keys = list(MODELS.keys())
+    model = st.selectbox(
+        "★ Unit Model",
+        model_keys,
+        index=model_keys.index(p["model"]),
+        format_func=lambda k: MODELS[k]["label"],
+        help="Select the Flogistix model. This sets nameplate hp, max capacity, rotor geometry, and pressure rating."
+    )
+    if model != p["model"]:
+        p["model"] = model
+        M = MODELS[model]
+        p["disp"] = M["disp"]; p["Vi"] = M["Vi"]; p["oilGpm"] = M["oilGpm"]
+    M = MODELS[p["model"]]
+
+    # ════════════════════════════════════════════════════════════════════════
+    # GUIDED MODE — 8 high-leverage controls with inline context
+    # ════════════════════════════════════════════════════════════════════════
+    if guided:
+        st.markdown('<div class="sec-header" style="color:#5B9BD5">★ Primary Controls — Source & Separation</div>', unsafe_allow_html=True)
+        g1, g2 = st.columns(2)
+        with g1:
+            p["pSep"] = st.slider(
+                "★ Separator pressure (psig)",
+                15, 250, int(p["pSep"]), 5,
+                help="The single biggest lever on VRU load. Drop this → less flash gas."
+            )
+            st.caption("↑ Drop this to cut flash gas — the cheapest 'bigger VRU' is often a lower separator pressure.")
+            p["qLiq"] = st.slider(
+                "★ Liquid production rate (bbl/d)",
+                50, 30000, int(p["qLiq"]), 100,
+                help="Well throughput. More oil → more flash and working-loss gas."
+            )
+            st.caption("↑ Sets working loss and flash gas volume directly.")
+            p["api"] = st.slider(
+                "Stock-tank oil gravity (°API)",
+                22.0, 48.0, float(p["api"]), 0.5,
+                help="Lighter oil (higher API) has more dissolved gas and higher TVP."
+            )
+        with g2:
+            p["pTankOz"] = st.slider(
+                "★ Tank pressure (oz/in²)",
+                -10.0, 30.0, float(p["pTankOz"]), 0.25,
+                help="Must stay between vacuum breaker (−6 oz) and PVRV (16 oz). The VRU holds this line."
+            )
+            st.caption(f"↑ Operating band: {p['pVac']:.1f} oz (vacuum) to {p['pPvrv']:.1f} oz (PVRV). Margin: {p['pPvrv']-p['pTankOz']:.1f} oz.")
+            p["pSales"] = st.slider(
+                "★ Sales / discharge pressure (psig)",
+                20, 400, int(p["pSales"]), 5,
+                help="The back-pressure the compressor works against. Higher = more hp required."
+            )
+            st.caption("↑ Governs pressure ratio and horsepower. Set by the pipeline or separator you're compressing into.")
+            p["tAir"] = st.slider(
+                "Ambient temperature (°F)",
+                -10, 120, int(p["tAir"]), 1,
+                help="Drives breathing loss and aftercooler performance. Hot days = more venting risk."
+            )
+            p["tTank"] = st.slider(
+                "Tank vapour temperature (°F)",
+                50, 130, int(p["tTank"]), 1,
+                help="Hot tanks have higher TVP → more flash and working loss."
+            )
+
+    # ════════════════════════════════════════════════════════════════════════
+    # EXPERT MODE — full parameter tabs
+    # ════════════════════════════════════════════════════════════════════════
+    else:
+        use_real = st.toggle("Peng-Robinson EOS", value=p["use_real"])
+        p["use_real"] = use_real
+
+    # ── Parameter tabs (Expert only) ─────────────────────────────────────────
+    if not guided:
+        tabs = st.tabs(["🛢️ Source & Tank", "🔩 Compressor", "🌡️ Thermal & Control",
+                        "🔥 Combustion", "💰 Economics", "⚗️ Composition"])
+
+        # ── Tab 0: Source & Tank ──
+        with tabs[0]:
+            c1, c2 = st.columns(2)
+            with c1:
+                sec("★ Well Stream & Separator")
+                p["qLiq"]   = st.slider("★ Well-stream liquid (bbl/d)", 50, 30000, int(p["qLiq"]), 50)
+                p["api"]    = st.slider("Stock-tank oil gravity (°API)", 22.0, 48.0, float(p["api"]), 0.5)
+                p["pSep"]   = st.slider("★ Separator pressure (psig)", 15, 250, int(p["pSep"]), 1)
+                p["tSep"]   = st.slider("Separator temperature (°F)", 60, 160, int(p["tSep"]), 1)
+                p["tTank"]  = st.slider("Tank liquid temperature (°F)", 50, 130, int(p["tTank"]), 1)
+                p["dTdiur"] = st.slider("Diurnal vapour-space swing (°F)", 0, 50, int(p["dTdiur"]), 1)
+                p["qBlank"] = st.slider("Blanket / gas-lift leak-in (MSCFD)", 0, 120, int(p["qBlank"]), 1)
+            with c2:
+                sec("Tank Battery Geometry")
+                p["nTank"]  = st.slider("Number of stock tanks", 1, 6, int(p["nTank"]), 1)
+                p["dTank"]  = st.slider("Tank diameter (ft)", 8.0, 24.0, float(p["dTank"]), 0.5)
+                p["hTank"]  = st.slider("Tank shell height (ft)", 8.0, 32.0, float(p["hTank"]), 0.5)
+                p["level"]  = st.slider("Average liquid level (%)", 5, 90, int(p["level"]), 1)
+                p["turnKn"] = st.slider("Turnover factor K_N", 0.20, 1.00, float(p["turnKn"]), 0.01)
+                p["prodKp"] = st.slider("Product factor K_P", 0.50, 1.00, float(p["prodKp"]), 0.01)
+                p["ventKe"] = st.slider("Breathing-loss multiplier", 0.0, 3.0, float(p["ventKe"]), 0.05)
+                p["pPvrv"]  = st.slider("★ Thief hatch / PVRV pop (oz)", 6.0, 40.0, float(p["pPvrv"]), 0.5)
+                p["pVac"]   = st.slider("Vacuum breaker setting (oz)", -12.0, -1.0, float(p["pVac"]), 0.5)
+                p["pTankOz"]= st.slider("★ Tank pressure (oz)", -10.0, 30.0, float(p["pTankOz"]), 0.25)
+
+        # ── Tab 1: Compressor ──
+        with tabs[1]:
+            c1, c2 = st.columns(2)
+            with c1:
+                sec("Screw Geometry & Internals")
+                p["disp"]   = st.slider("Rotor displacement (ft³/rev)", 0.02, 0.80, float(p["disp"]), 0.002)
+                p["Vi"]     = st.slider("★ Built-in volume ratio Vᵢ", 1.6, 5.5, float(p["Vi"]), 0.05)
+                p["kSlip"]  = st.slider("Clearance slip coefficient", 0.0, 6.0, float(p["kSlip"]), 0.05)
+                p["load"]   = st.slider("★ Speed / load (%)", 0.0, 100.0, float(p["load"]), 1.0)
+            with c2:
+                sec("Performance & Oil System")
+                p["etaIs"]  = st.slider("Baseline isentropic efficiency", 0.45, 0.90, float(p["etaIs"]), 0.005)
+                p["mechL"]  = st.slider("Mechanical / bearing loss", 0.01, 0.12, float(p["mechL"]), 0.005)
+                p["oilGpm"] = st.slider("Injected oil circulation (gpm)", 0.0, 40.0, float(p["oilGpm"]), 0.5)
+                p["tOil"]   = st.slider("Oil inlet temperature (°F)", 90, 210, int(p["tOil"]), 1)
+                p["cpOil"]  = st.slider("Oil specific heat (Btu/lb·°F)", 0.35, 0.60, float(p["cpOil"]), 0.005)
+                p["dpSuct"] = st.slider("Suction line + scrubber loss (oz)", 0.0, 24.0, float(p["dpSuct"]), 0.5)
+                p["pSales"] = st.slider("★ Sales / discharge pressure (psig)", 20, 400, int(p["pSales"]), 5)
+
+        # ── Tab 2: Thermal & Control ──
+        with tabs[2]:
+            c1, c2 = st.columns(2)
+            with c1:
+                sec("Aftercooler")
+                p["uaCool"]  = st.slider("Aftercooler UA (Btu/hr·°F)", 200, 9000, int(p["uaCool"]), 50)
+                p["tAir"]    = st.slider("Ambient air temperature (°F)", -10, 120, int(p["tAir"]), 1)
+                p["scrubEff"]= st.slider("Inlet scrubber separation (%)", 80.0, 100.0, float(p["scrubEff"]), 0.1)
+            with c2:
+                sec("Pressure Setpoint")
+                p["pSet"]    = st.slider("Suction pressure setpoint (oz)", -2.0, 24.0, float(p["pSet"]), 0.25)
+                p["cvVent"]  = st.slider("PVRV relief coefficient", 50, 1200, int(p["cvVent"]), 10)
+                p["cvVac"]   = st.slider("Vacuum breaker capacity (MSCFD/√oz)", 20, 2000, int(p["cvVac"]), 20)
+
+        # ── Tab 3: Combustion ──
+        with tabs[3]:
+            c1, c2 = st.columns(2)
+            with c1:
+                sec("Engine / Burner")
+                p["lambda"]  = st.slider("Excess-air ratio λ", 1.0, 2.2, float(p["lambda"]), 0.01)
+                p["bsfc"]    = st.slider("Driver heat rate BSFC (Btu/bhp·hr)", 6000, 12000, int(p["bsfc"]), 50)
+                p["tIntake"] = st.slider("Combustion air inlet temperature (°F)", 40, 180, int(p["tIntake"]), 1)
+                p["mnReq"]   = st.slider("Engine methane-number requirement", 30, 80, int(p["mnReq"]), 1)
+            with c2:
+                sec("Emissions")
+                p["slipPct"] = st.slider("Engine methane slip (% of fuel)", 0.0, 4.0, float(p["slipPct"]), 0.05)
+                p["dre"]     = st.slider("Flare destruction efficiency (%)", 90.0, 99.9, float(p["dre"]), 0.1)
+                p["gwp"]     = st.slider("Methane GWP (100-yr)", 20, 86, int(p["gwp"]), 1)
+
+        # ── Tab 4: Economics ──
+        with tabs[4]:
+            c1, c2 = st.columns(2)
+            with c1:
+                sec("Revenue")
+                p["pxGas"]   = st.slider("Residue gas price ($/Mcf)", 0.5, 12.0, float(p["pxGas"]), 0.05)
+                p["pxNgl"]   = st.slider("Condensate / NGL price ($/bbl)", 5, 90, int(p["pxNgl"]), 1)
+            with c2:
+                sec("Operating Cost")
+                p["pxKwh"]   = st.slider("Electricity price ($/kWh)", 0.02, 0.30, float(p["pxKwh"]), 0.005)
+                p["etaMot"]  = st.slider("Motor + drive efficiency", 0.80, 0.98, float(p["etaMot"]), 0.005)
+                p["rent"]    = st.slider("Package rental rate ($/month)", 0, 30000, int(p["rent"]), 250)
+                p["co2Tax"]  = st.slider("Methane fee / carbon value ($/tonne CO₂e)", 0, 200, int(p["co2Tax"]), 5)
+
+        # ── Tab 5: Composition ──
+        with tabs[5]:
+            sec("Well-Stream Composition (mole %)")
+            st.caption("Drag freely — values are normalised internally.")
+            cols = st.columns(3)
+            for i, comp in enumerate(COMPS):
+                with cols[i % 3]:
+                    feed_pct[i] = st.slider(
+                        f"{comp['id']} — {comp['name']}",
+                        0.0, 80.0, float(feed_pct[i]), 0.05,
+                        key=f"comp_{i}"
+                    )
+            z = normalize(feed_pct)
+            tot = sum(feed_pct)
+            st.caption(f"Entered total: {f(tot,2)} mol%  ·  Vapour MW: **{f(mix_mw(normalize(feed_pct)),1)}** lb/lbmol  ·  SG: **{f(mix_sg(z),3)}**")
+
+    st.divider()
+
+    # ── Live results (always shown) ──────────────────────────────────────────
     R = solve(p, feed_pct, p["use_real"])
     sec("Live Results")
 
-    # Alarms
     html = ""
     if R["qVent"] > 0.05:
         html += alarm_html(f"🚨 VENTING {f(R['qVent'],1)} MSCFD — {f(R['lostDay'],0)} $/day to atmosphere", "red")
@@ -974,15 +1067,15 @@ def page_simulator():
     with c1:
         sec("Vapour Generation")
         rows = [
-            ("Flash gas",       f"{f(R['qFlash'],1)} MSCFD"),
-            ("Working loss",    f"{f(R['qWork'],2)} MSCFD"),
-            ("Breathing loss",  f"{f(R['qBreath'],2)} MSCFD"),
-            ("Blanket/leak-in", f"{f(p['qBlank'],1)} MSCFD"),
-            ("TOTAL generated", f"{f(R['qGen'],1)} MSCFD"),
-            ("Vapour MW",       f"{f(mix_mw(R['yVap']),1)} lb/lbmol"),
-            ("Tank TVP",        f"{f(R['tvp'],2)} psia"),
+            ("Flash gas",         f"{f(R['qFlash'],1)} MSCFD"),
+            ("Working loss",      f"{f(R['qWork'],2)} MSCFD"),
+            ("Breathing loss",    f"{f(R['qBreath'],2)} MSCFD"),
+            ("Blanket/leak-in",   f"{f(p['qBlank'],1)} MSCFD"),
+            ("TOTAL generated",   f"{f(R['qGen'],1)} MSCFD"),
+            ("Vapour MW",         f"{f(mix_mw(R['yVap']),1)} lb/lbmol"),
+            ("Tank TVP",          f"{f(R['tvp'],2)} psia"),
             ("Compressibility Z", f"{f(R['zVap'],4)}"),
-            ("Vapour space",    f"{f(R['vSpace'],0)} ft³"),
+            ("Vapour space",      f"{f(R['vSpace'],0)} ft³"),
         ]
         st.markdown("".join(rrow(l, v) for l, v in rows), unsafe_allow_html=True)
 
@@ -1011,25 +1104,134 @@ def page_simulator():
     with c3:
         sec("Combustion, Emissions & Money")
         rows = [
-            ("LHV",              f"{f(R['lhv'],0)} Btu/scf"),
-            ("HHV",              f"{f(R['hhv'],0)} Btu/scf"),
-            ("Wobbe index",      f"{f(R['wobbe'],0)}"),
-            ("A/F stoich",       f"{f(R['afStoichMass'],2)} lb/lb"),
-            ("Flame temp",       f"{f(R2F(R['tFlame']),0)} °F"),
-            ("Methane number",   f"{f(R['mn'],1)}"),
-            ("Driver fuel",      f"{f(R['fuelMscfd'],1)} MSCFD"),
-            ("Electrical draw",  f"{f(R['kW'],1)} kW"),
-            ("Net to sales",     f"{f(R['qNet'],1)} MSCFD"),
-            ("CO₂e — vent all",  f"{f(R['co2eVent'],2)} t/d"),
-            ("CO₂e — with VRU",  f"{f(R['co2eVru'],3)} t/d"),
-            ("CO₂e avoided",     f"{f(R['co2eAvoid']*365,0)} t/yr"),
-            ("Gas revenue",      f"${f(R['revGas'],0)}/d"),
-            ("NGL revenue",      f"${f(R['revNgl'],0)}/d"),
-            ("Power cost",       f"−${f(R['costPwr'],0)}/d"),
-            ("Rental",           f"−${f(R['costRent'],0)}/d"),
-            ("Net margin",       f"${f(R['netDay'],0)}/d"),
+            ("LHV",             f"{f(R['lhv'],0)} Btu/scf"),
+            ("HHV",             f"{f(R['hhv'],0)} Btu/scf"),
+            ("Wobbe index",     f"{f(R['wobbe'],0)}"),
+            ("A/F stoich",      f"{f(R['afStoichMass'],2)} lb/lb"),
+            ("Flame temp",      f"{f(R2F(R['tFlame']),0)} °F"),
+            ("Methane number",  f"{f(R['mn'],1)}"),
+            ("Driver fuel",     f"{f(R['fuelMscfd'],1)} MSCFD"),
+            ("Electrical draw", f"{f(R['kW'],1)} kW"),
+            ("Net to sales",    f"{f(R['qNet'],1)} MSCFD"),
+            ("CO₂e — vent all", f"{f(R['co2eVent'],2)} t/d"),
+            ("CO₂e — with VRU", f"{f(R['co2eVru'],3)} t/d"),
+            ("CO₂e avoided",    f"{f(R['co2eAvoid']*365,0)} t/yr"),
+            ("Gas revenue",     f"${f(R['revGas'],0)}/d"),
+            ("NGL revenue",     f"${f(R['revNgl'],0)}/d"),
+            ("Power cost",      f"−${f(R['costPwr'],0)}/d"),
+            ("Rental",          f"−${f(R['costRent'],0)}/d"),
+            ("Net margin",      f"${f(R['netDay'],0)}/d"),
         ]
         st.markdown("".join(rrow(l, v) for l, v in rows), unsafe_allow_html=True)
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Sensitivity chart helper — renders an inline mini-chart for each formula card
+# ─────────────────────────────────────────────────────────────────────────────
+def sens_chart(label, x_vals, y_vals, x_current, y_current, x_unit="", y_unit="", takeaway=""):
+    """
+    Renders a compact sensitivity chart using Streamlit's line_chart.
+    x_vals / y_vals — lists of equal length
+    x_current / y_current — current operating point (highlighted as a metric)
+    """
+    import pandas as pd
+    df = pd.DataFrame({"x": x_vals, label: y_vals}).set_index("x")
+    st.markdown(f"**📈 Sensitivity — how {label} responds to {label.split('(')[0].strip()}:**")
+    st.line_chart(df, height=160, use_container_width=True)
+    col_a, col_b = st.columns(2)
+    col_a.metric(f"Current {x_unit}", f"{x_current:.2g}")
+    col_b.metric(f"Current output {y_unit}", f"{y_current:.3g}")
+    if takeaway:
+        st.caption(f"💡 {takeaway}")
+
+
+def _chart_flash_vs_sep(p, feed_pct):
+    import pandas as pd
+    xs = list(range(15, 251, 10))
+    ys = []
+    for ps in xs:
+        pp = dict(p); pp["pSep"] = ps
+        try:
+            r = solve(pp, feed_pct, False)
+            ys.append(round(r["qFlash"], 2))
+        except Exception:
+            ys.append(None)
+    df = pd.DataFrame({"Separator pressure (psig)": xs, "Flash gas (MSCFD)": ys}).set_index("Separator pressure (psig)")
+    st.markdown("**📈 Flash gas vs separator pressure** — hold everything else constant:")
+    st.line_chart(df, height=160, use_container_width=True)
+    col_a, col_b = st.columns(2)
+    col_a.metric("Current sep pressure", f"{p['pSep']} psig")
+    col_b.metric("Current flash gas", f"{solve(p, feed_pct, False)['qFlash']:.2f} MSCFD")
+    st.caption("💡 Dropping separator pressure is often the cheapest way to reduce VRU load — no new equipment needed.")
+
+
+def _chart_etav_vs_speed(p, feed_pct):
+    import pandas as pd
+    xs = list(range(10, 101, 5))
+    ys = []
+    M = MODELS[p["model"]]
+    for spd in xs:
+        pp = dict(p); pp["load"] = spd
+        try:
+            rpm = M["rpmRated"] * spd / 100
+            Ps = max(PSTD - 0.45, (PSTD + p["pTankOz"] / OZ) - p["dpSuct"] / OZ)
+            Pd = p["pSales"] + PSTD
+            rho_s = max(1e-4, gas_density(normalize(feed_pct), F2R(p["tTank"]), Ps, False)["mass"])
+            q_slip = p["kSlip"] * math.sqrt(max(0, Pd - Ps) / rho_s)
+            disp_cfm = p["disp"] * rpm
+            eta_v = max(0, 1 - q_slip / disp_cfm) if disp_cfm > 0 else 0
+            ys.append(round(eta_v * 100, 1))
+        except Exception:
+            ys.append(None)
+    df = pd.DataFrame({"Speed (%rated)": xs, "Volumetric eff. (%)": ys}).set_index("Speed (%rated)")
+    st.markdown("**📈 Volumetric efficiency vs shaft speed** — slip is nearly constant, so turndown kills efficiency:")
+    st.line_chart(df, height=160, use_container_width=True)
+    col_a, col_b = st.columns(2)
+    col_a.metric("Current speed", f"{p['load']:.0f}%")
+    col_b.metric("Current η_V", f"{solve(p, feed_pct, False)['etaV']*100:.1f}%")
+    st.caption("💡 Below ~40% speed, slip exceeds displacement and the machine barely moves gas. This sets the real minimum load.")
+
+
+def _chart_bhp_vs_pr(p, feed_pct):
+    import pandas as pd
+    xs = [round(1.5 + i * 0.5, 1) for i in range(20)]
+    ys = []
+    for pr in xs:
+        target_pd = pr * (PSTD + p["pTankOz"] / OZ) - PSTD
+        pp = dict(p); pp["pSales"] = max(20, int(target_pd))
+        try:
+            r = solve(pp, feed_pct, False)
+            ys.append(round(r["bhp"], 1))
+        except Exception:
+            ys.append(None)
+    df = pd.DataFrame({"Pressure ratio": xs, "Shaft power (BHP)": ys}).set_index("Pressure ratio")
+    st.markdown("**📈 Shaft power vs pressure ratio** — power rises steeply at high ratios:")
+    st.line_chart(df, height=160, use_container_width=True)
+    col_a, col_b = st.columns(2)
+    col_a.metric("Current ratio", f"{solve(p, feed_pct, False)['r']:.2f}")
+    col_b.metric("Current BHP", f"{solve(p, feed_pct, False)['bhp']:.0f}")
+    st.caption("💡 BHP scales roughly as r^((k-1)/k). Doubling the pressure ratio doesn't double BHP — it's worse than that.")
+
+
+def _chart_td_vs_oilgpm(p, feed_pct):
+    import pandas as pd
+    xs = [round(i * 0.5, 1) for i in range(0, 41)]
+    ys = []
+    for gpm in xs:
+        pp = dict(p); pp["oilGpm"] = gpm
+        try:
+            r = solve(pp, feed_pct, False)
+            ys.append(round(R2F(r["td"]), 0))
+        except Exception:
+            ys.append(None)
+    df = pd.DataFrame({"Oil circulation (gpm)": xs, "Discharge temp (°F)": ys}).set_index("Oil circulation (gpm)")
+    st.markdown("**📈 Discharge temperature vs oil circulation** — injected oil absorbs compression heat:")
+    st.line_chart(df, height=160, use_container_width=True)
+    r_now = solve(p, feed_pct, False)
+    col_a, col_b = st.columns(2)
+    col_a.metric("Current oil flow", f"{p['oilGpm']:.1f} gpm")
+    col_b.metric("Current disch. temp", f"{R2F(r_now['td']):.0f} °F")
+    st.caption(f"💡 With zero oil: {R2F(r_now['tdDry']):.0f} °F dry adiabatic. Oil injection drops this to a survivable level.")
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -1041,7 +1243,7 @@ def page_equations():
 
     R = solve(p, feed_pct, p["use_real"])
 
-    def card(title, what_it_calculates, symbols_explained, formula_lines, live_value, real_world):
+    def card(title, what_it_calculates, symbols_explained, formula_lines, live_value, real_world, chart_fn=None):
         with st.expander(f"**{title}**", expanded=False):
             st.markdown(f"**🎯 What this calculates:** {what_it_calculates}")
             st.divider()
@@ -1053,6 +1255,9 @@ def page_equations():
             st.markdown(f'<div class="formula-box">{chr(10).join(formula_lines)}</div>', unsafe_allow_html=True)
             st.markdown("**📊 Live numbers right now:**")
             st.markdown(f'<div class="numbox">▶ {live_value}</div>', unsafe_allow_html=True)
+            if chart_fn:
+                st.divider()
+                chart_fn()
             st.divider()
             st.markdown(f"**🌍 What this means in the real world:** {real_world}")
 
@@ -1188,7 +1393,8 @@ def page_equations():
             ["ṅ_feed = q_liq × 5.6146 × γₒ × 62.37 ÷ M_feed     (barrels → lbmol/day)",
              "Q_flash = ṅ_feed × (1−β₁) × β₂ × 379.48 ÷ 1000    (lbmol/day → MSCFD)"],
             f"γₒ = {f(sg_oil,4)}  |  ṅ_feed = {f(p['qLiq']*5.6146*sg_oil*62.37/mix_mw(R['z']),0)} lbmol/day  →  Flash gas = {f(R['qFlash'],1)} MSCFD",
-            "This is a long chain of unit conversions. The key insight is that 'barrels per day of oil' and 'thousand cubic feet per day of gas' are measuring the same physical stream in completely different units — this formula is how you get from one to the other."
+            "This is a long chain of unit conversions. The key insight is that 'barrels per day of oil' and 'thousand cubic feet per day of gas' are measuring the same physical stream in completely different units — this formula is how you get from one to the other.",
+            chart_fn=lambda: _chart_flash_vs_sep(p, feed_pct)
         )
 
         card(
@@ -1316,7 +1522,8 @@ def page_equations():
              "η_V     = 1 − (Q_slip ÷ V̇_disp)                               (efficiency)",
              "Q_cap   = V̇_disp × η_V × (pressure correction) × (temperature correction) ÷ 1000   (MSCFD)"],
             f"Displacement = {f(R['dispCfm'],1)} CFM  |  Slip = {f(R['qSlip'],1)} CFM  |  η_V = {f(R['etaV']*100,1)}%  →  Capacity = {f(R['qCap'],1)} MSCFD",
-            "The slip is nearly constant with speed. So if you halve the speed, displacement halves but slip stays the same — efficiency collapses. This is the opposite of a piston compressor and it's why screw VRUs need a minimum speed to work properly."
+            "The slip is nearly constant with speed. So if you halve the speed, displacement halves but slip stays the same — efficiency collapses. This is the opposite of a piston compressor and it's why screw VRUs need a minimum speed to work properly.",
+            chart_fn=lambda: _chart_etav_vs_speed(p, feed_pct)
         )
 
         card(
@@ -1356,7 +1563,8 @@ def page_equations():
             ["H    = (1545 ÷ MW) × T_suction × Z_avg × (k÷(k−1)) × ( (Pd÷Ps)^((k−1)/k) − 1 )",
              "BHP  = (ṁ × H) ÷ (33000 × η_isen × η_port) ÷ (1 − ℓ_mech) + BHP_oil"],
             f"ṁ = {f(R['mDot'],2)} lb/min  |  H = {f(R['head'],0)} ft·lbf/lbm  |  η_total = {f(R['etaTot']*100,1)}%  |  BHP = {f(R['bhp'],1)} of {R['M']['hp']} hp rated ({f(R['hpPct'],0)}%)",
-            "This is the number that sizes the motor and the power service. Every inefficiency upstream — mismatched Vᵢ, lost suction pressure, poor volumetric efficiency — shows up here as extra horsepower required."
+            "This is the number that sizes the motor and the power service. Every inefficiency upstream — mismatched Vᵢ, lost suction pressure, poor volumetric efficiency — shows up here as extra horsepower required.",
+            chart_fn=lambda: _chart_bhp_vs_pr(p, feed_pct)
         )
 
         card(
@@ -1378,7 +1586,8 @@ def page_equations():
              "T_d   = (W_shaft + ṁ_gas×cp_gas×T_suction + ṁ_oil×cp_oil×T_oil)",
              "        ÷ (ṁ_gas×cp_gas + ṁ_oil×cp_oil)         (with oil — much cooler)"],
             f"Without oil: {f(R2F(R['tdDry']),0)} °F  |  With oil injection at {f(p['oilGpm'],1)} gpm: {f(R2F(R['td']),0)} °F  |  Oil absorbs the difference",
-            "Try dragging the oil circulation slider to zero on the Simulator page. The discharge temperature shoots up toward the dry adiabatic value and the temperature alarm fires. That's exactly why oil-flooded screws dominate vapour recovery — they handle pressure ratios that no dry single-stage machine could survive."
+            "Try dragging the oil circulation slider to zero on the Simulator page. The discharge temperature shoots up toward the dry adiabatic value and the temperature alarm fires. That's exactly why oil-flooded screws dominate vapour recovery — they handle pressure ratios that no dry single-stage machine could survive.",
+            chart_fn=lambda: _chart_td_vs_oilgpm(p, feed_pct)
         )
 
     # ── Tab 4: Heat & Condensate ──────────────────────────────────────────
@@ -1552,6 +1761,15 @@ of it leaves the liquid, while C7+ sits near 10⁻⁵ and stays behind.
 vapour MW rises, k falls toward 1.1, and LHV climbs past 1600 Btu/scf.
 That single composition change is the reason a VRU behaves nothing like a gas-lift compressor.
 """,
+        "checkpoint": {
+            "q": "If you increase propane (C3) in the composition, what happens to vapour MW?",
+            "choices": [
+                "It increases — heavier molecules raise the average",
+                "It decreases — more C3 dilutes the heavy ends",
+                "It stays the same — MW is fixed by oil API",
+            ],
+            "answer": 0,
+        },
     },
     {
         "title": "2 · Separator pressure sets your load",
@@ -1571,6 +1789,15 @@ the first question is not "what size unit?" — it is "what is the separator doi
 Every psi you drop there is flash gas captured at high pressure for free
 instead of low pressure through a compressor.
 """,
+        "checkpoint": {
+            "q": "If you drop separator pressure from 180 psig to 40 psig, flash gas will:",
+            "choices": [
+                "Decrease — less pressure differential means less flashing",
+                "Increase — lower pressure releases more dissolved gas",
+                "Stay the same — flash gas depends only on oil rate",
+            ],
+            "answer": 1,
+        },
     },
     {
         "title": "3 · Ounces, not psi",
@@ -1589,6 +1816,15 @@ Look at the **Tank pressure** readout on the dashboard and notice how close it s
 the PVRV setting and the vacuum setting simultaneously. Everything in this system is a fight
 to keep that number between the lines.
 """,
+        "checkpoint": {
+            "q": "Why do VRU operators measure tank pressure in ounces, not psi?",
+            "choices": [
+                "Atmospheric tanks are so thin that the safe operating band is less than 2 psi total — ounces give finer resolution",
+                "Ounces are the industry standard for all compression equipment",
+                "It is a historical convention with no physical reason",
+            ],
+            "answer": 0,
+        },
     },
     {
         "title": "4 · Undersize it and the hatch pops",
@@ -1606,6 +1842,15 @@ it is product going to atmosphere per day.
 Now change the model to **FX12V125** without touching anything else. Pressure recovers and
 venting stops. That gap between the two models is the entire sizing conversation.
 """,
+        "checkpoint": {
+            "q": "When the VRU capacity is less than gas generated, what happens first?",
+            "choices": [
+                "Tank pressure rises until the PVRV pops, venting gas to atmosphere",
+                "The compressor automatically increases speed above rated",
+                "The vacuum breaker opens and admits air",
+            ],
+            "answer": 0,
+        },
     },
     {
         "title": "5 · The screw's sweet spot",
@@ -1785,6 +2030,72 @@ are the three ways out — which is exactly why the product line splits into ele
 VRX/FX and gas FX.
 """,
     },
+    {
+        "title": "13 · The Logix PLC and VFD",
+        "desc":  "How the machine controls itself.",
+        "setup": {"model": "FX12V125", "pSales": 150, "pSet": 6.0, "pTankOz": 6.0,
+                  "load": 75, "qLiq": 8000, "nTank": 4, "pSep": 60},
+        "comp":  None,
+        "text": """
+The Logix PLC is the brain. PT-101 reads tank pressure every second.
+
+**The closed loop:**
+1. Tank pressure drifts above setpoint (more gas arriving than leaving)
+2. PT-101 signal rises → Logix PLC detects positive error
+3. PLC increases VFD frequency → motor speeds up → more displacement → more gas captured
+4. Tank pressure returns to setpoint
+
+The reverse happens if pressure drops toward vacuum.
+
+**VFD advantage:** speed changes are smooth and continuous — no banging solenoids, no on/off cycling that hammers the rotor.
+
+**Versatrol** is the backup: a recycle valve the PLC cracks open when even minimum speed is too much capacity for the well — it recirculates compressed gas back to suction, allowing true 100% turndown without stalling.
+
+**Try it:** Set Speed/load to 30% on the Simulator. Watch volumetric efficiency collapse. That collapse is why the PLC never commands below ~40% without also opening Versatrol.
+""",
+        "checkpoint": {
+            "q": "What does the Logix PLC do when tank pressure rises above setpoint?",
+            "choices": [
+                "Sends a higher speed command to the VFD, increasing compressor throughput",
+                "Opens the PVRV to vent excess gas",
+                "Reduces VFD speed to avoid overloading the motor",
+            ],
+            "answer": 0,
+        },
+    },
+    {
+        "title": "14 · Multi-Stream™ — two pressures, one unit",
+        "desc":  "Flogistix patent: capturing gas from separator and tank simultaneously.",
+        "setup": {"model": "FX12V125", "pSales": 200, "pSep": 120, "pTankOz": 6.0,
+                  "qLiq": 10000, "nTank": 4, "load": 100},
+        "comp":  None,
+        "text": """
+A typical lease produces gas at two very different pressures simultaneously:
+- **Separator gas**: 60–200 psig — from the production separator
+- **Tank vapour**: near atmospheric (a few ounces) — from the stock tanks
+
+Traditionally you needed two compressors or wasted energy by throttling the separator gas down to tank pressure before compressing it.
+
+**Multi-Stream™** (Flogistix patent, administered through the Logix PLC):
+- Two independent suction headers with separate pressure targets
+- The PLC controls a manifold that lets the compressor draw from both sources
+- Each stream has its own pressure setpoint; the PLC balances the draw to hold both
+- No backflow between streams — the separator cannot blow into the tank header
+
+**The economic case:** one FX12V125 doing the work of two smaller units. Lower rental cost, smaller pad footprint, and the PLC handles the balancing automatically as the well profile changes through the day.
+
+**Notice** in the Dashboard: the total generated gas is the sum of both streams. Multi-Stream captures all of it through a single discharge to the sales line.
+""",
+        "checkpoint": {
+            "q": "What is the key advantage of Multi-Stream™ vs two separate compressors?",
+            "choices": [
+                "One unit handles both pressure levels simultaneously — lower cost and footprint",
+                "Two compressors are always more efficient than one",
+                "Multi-Stream only works with gas-engine drivers",
+            ],
+            "answer": 0,
+        },
+    },
 ]
 
 def apply_lesson_setup(lesson):
@@ -1804,6 +2115,8 @@ def page_lessons():
 
     if "lesson_idx" not in st.session_state:
         st.session_state["lesson_idx"] = None
+    if "completed_lessons" not in st.session_state:
+        st.session_state["completed_lessons"] = set()
 
     col_l, col_r = st.columns([1, 2])
 
@@ -1811,7 +2124,8 @@ def page_lessons():
         st.markdown("**Select a lesson:**")
         for i, lesson in enumerate(LESSONS):
             is_active = st.session_state["lesson_idx"] == i
-            btn_label = f"{'▶ ' if is_active else ''}{lesson['title']}"
+            done_badge = " ✓" if i in st.session_state["completed_lessons"] else ""
+            btn_label = f"{'▶ ' if is_active else ''}{lesson['title']}{done_badge}"
             if st.button(btn_label, key=f"lesson_{i}", use_container_width=True,
                          type="primary" if is_active else "secondary"):
                 st.session_state["lesson_idx"] = i
@@ -1837,6 +2151,25 @@ def page_lessons():
             st.divider()
             st.markdown(lesson["text"])
             st.divider()
+
+            # Checkpoint quiz
+            if "checkpoint" in lesson:
+                chk = lesson["checkpoint"]
+                st.markdown("#### 🎯 Checkpoint")
+                answer_idx = st.radio(
+                    chk["q"],
+                    options=list(range(len(chk["choices"]))),
+                    format_func=lambda x, c=chk["choices"]: c[x],
+                    key=f"chk_{idx}",
+                    index=None,
+                )
+                if answer_idx is not None:
+                    if answer_idx == chk["answer"]:
+                        st.success("✅ Correct!")
+                        st.session_state["completed_lessons"].add(idx)
+                    else:
+                        st.error("❌ Not quite — review the lesson text and try again.")
+                st.divider()
 
             # Show key live outputs for this lesson
             R = solve(p, feed_pct, p["use_real"])
@@ -2034,11 +2367,17 @@ def page_3d():
             "qVent":     round(R["qVent"], 2),
             "bhp":       round(R["bhp"], 1),
             "td_f":      round(R2F(R["td"]), 1),
+            "tCool_f":   round(R2F(R["tCool"]), 1),
+            "hpPct":     round(R["hpPct"], 1),
             "load_pct":  round(p["load"], 1),
             "nTank":     int(p["nTank"]),
             "level_pct": round(p["level"], 1),
             "running":   bool(p["running"]),
             "model":     p["model"],
+            "pPvrv":     round(p["pPvrv"], 1),
+            "pVac":      round(p["pVac"], 1),
+            "pSep":      round(p["pSep"], 1),
+            "qGen":      round(R["qGen"], 1),
         }
     })
     # Append a tiny script that posts state once the iframe loads
@@ -2074,6 +2413,193 @@ def page_3d():
 
 
 # ─────────────────────────────────────────────────────────────────────────────
+# Page: Control System
+# ─────────────────────────────────────────────────────────────────────────────
+def page_controls():
+    st.title("🎛️ Control System")
+    st.caption("How the Logix PLC, VFD, and Versatrol work together to hold tank pressure steady.")
+
+    R = solve(p, feed_pct, p["use_real"])
+    M = MODELS[p["model"]]
+
+    # ── Status chips ──────────────────────────────────────────────────────────
+    chip_css = lambda color, bg: f"background:{bg};border:1px solid {color};color:{color};padding:4px 12px;border-radius:3px;font-size:0.78rem;font-family:monospace;letter-spacing:.08em;margin-right:6px;"
+    plc_color  = "#6FBF73" if p["running"] else "#E4572E"
+    plc_bg     = "#0E2B14" if p["running"] else "#3A140A"
+    vfd_color  = "#F0A227" if p["load"] < 100 else "#6FBF73"
+    flux_color = "#5B9BD5"
+    chips_html = (
+        f'<span style="{chip_css(plc_color, plc_bg)}">⬤ LOGIX PLC — {"RUNNING" if p["running"] else "STOPPED"}</span>'
+        f'<span style="{chip_css(flux_color, "#0D1E2F")}">⬤ FLUX SCADA — CONNECTED</span>'
+        f'<span style="{chip_css(vfd_color, "#1E1500")}">⬤ VFD — {p["load"]:.0f}% SPEED</span>'
+        f'<span style="{chip_css("#8A9AA8", "#1B2530")}">⬤ VERSATROL — {"ACTIVE" if p["load"] < 100 else "FULL LOAD"}</span>'
+    )
+    st.markdown(chips_html, unsafe_allow_html=True)
+    st.divider()
+
+    # ── P&ID schematic (SVG) ──────────────────────────────────────────────────
+    tank_pct  = p["pTankOz"]
+    tank_col  = "#E4572E" if tank_pct > p["pPvrv"] or tank_pct < p["pVac"] else ("#F0A227" if abs(tank_pct - p["pSet"]) > 4 else "#6FBF73")
+    comp_col  = "#E4572E" if R["hpPct"] > 100 else ("#F0A227" if R["hpPct"] > 85 else "#6FBF73")
+    td_col    = "#E4572E" if R2F(R["td"]) > 340 else ("#F0A227" if R2F(R["td"]) > 280 else "#6FBF73")
+    cool_col  = "#5B9BD5"
+
+    svg = f"""
+<svg viewBox="0 0 820 420" xmlns="http://www.w3.org/2000/svg"
+     style="width:100%;background:#0C1218;border-radius:6px;border:1px solid #2E3B49">
+  <defs>
+    <marker id="arr" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#4FD1C5"/>
+    </marker>
+    <marker id="arr2" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#F0A227"/>
+    </marker>
+  </defs>
+
+  <!-- Tank battery -->
+  <rect x="30" y="140" width="90" height="120" rx="4" fill="#1B2530" stroke="{tank_col}" stroke-width="2"/>
+  <text x="75" y="135" fill="#8A9AA8" font-size="10" text-anchor="middle" font-family="monospace">TANK BATTERY</text>
+  <text x="75" y="175" fill="{tank_col}" font-size="13" text-anchor="middle" font-family="monospace" font-weight="bold">{p['pTankOz']:.1f} oz</text>
+  <text x="75" y="192" fill="#8A9AA8" font-size="9" text-anchor="middle" font-family="monospace">tank pressure</text>
+  <text x="75" y="218" fill="#8A9AA8" font-size="9" text-anchor="middle" font-family="monospace">PVRV: {p['pPvrv']:.0f} oz</text>
+  <text x="75" y="232" fill="#8A9AA8" font-size="9" text-anchor="middle" font-family="monospace">Vac: {p['pVac']:.0f} oz</text>
+  <text x="75" y="248" fill="#8A9AA8" font-size="9" text-anchor="middle" font-family="monospace">Set: {p['pSet']:.0f} oz</text>
+
+  <!-- PT transmitter -->
+  <circle cx="75" cy="290" r="14" fill="#1B2530" stroke="#F0A227" stroke-width="1.5"/>
+  <text x="75" y="295" fill="#F0A227" font-size="9" text-anchor="middle" font-family="monospace">PT-101</text>
+  <line x1="75" y1="260" x2="75" y2="276" stroke="#F0A227" stroke-width="1.5"/>
+
+  <!-- Signal line PT → PLC -->
+  <line x1="89" y1="290" x2="310" y2="350" stroke="#F0A227" stroke-width="1" stroke-dasharray="4,3"/>
+  <text x="185" y="338" fill="#F0A227" font-size="8" font-family="monospace">4-20 mA signal</text>
+
+  <!-- Logix PLC box -->
+  <rect x="280" y="340" width="120" height="55" rx="4" fill="#1B2530" stroke="#F0A227" stroke-width="2"/>
+  <text x="340" y="358" fill="#F0A227" font-size="10" text-anchor="middle" font-family="monospace" font-weight="bold">LOGIX PLC</text>
+  <text x="340" y="372" fill="#8A9AA8" font-size="8" text-anchor="middle" font-family="monospace">Cl.1 Div.2</text>
+  <text x="340" y="386" fill="#8A9AA8" font-size="8" text-anchor="middle" font-family="monospace">PID control</text>
+
+  <!-- PLC → VFD signal -->
+  <line x1="400" y1="367" x2="490" y2="367" stroke="#4FD1C5" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arr)"/>
+  <text x="442" y="360" fill="#4FD1C5" font-size="8" font-family="monospace">speed cmd</text>
+
+  <!-- VFD box -->
+  <rect x="490" y="340" width="90" height="55" rx="4" fill="#1B2530" stroke="#4FD1C5" stroke-width="1.5"/>
+  <text x="535" y="358" fill="#4FD1C5" font-size="10" text-anchor="middle" font-family="monospace" font-weight="bold">VFD</text>
+  <text x="535" y="372" fill="#8A9AA8" font-size="8" text-anchor="middle" font-family="monospace">{p['load']:.0f}% speed</text>
+  <text x="535" y="386" fill="#8A9AA8" font-size="8" text-anchor="middle" font-family="monospace">{R['kW']:.0f} kW draw</text>
+
+  <!-- VFD → Motor -->
+  <line x1="535" y1="340" x2="535" y2="290" stroke="#4FD1C5" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- Vapour header pipe: tank → scrubber -->
+  <line x1="120" y1="200" x2="240" y2="200" stroke="#4FD1C5" stroke-width="3" marker-end="url(#arr)"/>
+  <text x="178" y="193" fill="#4FD1C5" font-size="8" font-family="monospace">{R['qGen']:.1f} MSCFD</text>
+
+  <!-- Scrubber V-201 -->
+  <rect x="240" y="165" width="55" height="75" rx="26" fill="#1B2530" stroke="#7A8794" stroke-width="1.5"/>
+  <text x="267" y="196" fill="#8A9AA8" font-size="9" text-anchor="middle" font-family="monospace">V-201</text>
+  <text x="267" y="210" fill="#8A9AA8" font-size="8" text-anchor="middle" font-family="monospace">scrubber</text>
+
+  <!-- Scrubber → Compressor -->
+  <line x1="295" y1="200" x2="390" y2="200" stroke="#4FD1C5" stroke-width="3" marker-end="url(#arr)"/>
+  <text x="337" y="193" fill="#4FD1C5" font-size="8" font-family="monospace">{R['Ps']:.1f} psia</text>
+
+  <!-- Compressor C-301 -->
+  <ellipse cx="430" cy="200" rx="38" ry="38" fill="#1B2530" stroke="{comp_col}" stroke-width="2"/>
+  <text x="430" y="196" fill="{comp_col}" font-size="10" text-anchor="middle" font-family="monospace" font-weight="bold">C-301</text>
+  <text x="430" y="210" fill="#8A9AA8" font-size="8" text-anchor="middle" font-family="monospace">{R['bhp']:.0f} BHP</text>
+  <text x="430" y="222" fill="#8A9AA8" font-size="8" text-anchor="middle" font-family="monospace">{R['hpPct']:.0f}%</text>
+
+  <!-- Compressor → Aftercooler (hot discharge) -->
+  <line x1="468" y1="200" x2="570" y2="200" stroke="#E4572E" stroke-width="3" marker-end="url(#arr)"/>
+  <text x="512" y="190" fill="#E4572E" font-size="8" font-family="monospace">{R2F(R['td']):.0f}°F</text>
+  <text x="512" y="216" fill="#8A9AA8" font-size="8" font-family="monospace">{R['Pd']-PSTD:.0f} psig</text>
+
+  <!-- Aftercooler E-401 -->
+  <rect x="570" y="165" width="80" height="70" rx="4" fill="#1B2530" stroke="{cool_col}" stroke-width="1.5"/>
+  <text x="610" y="193" fill="{cool_col}" font-size="9" text-anchor="middle" font-family="monospace">E-401</text>
+  <text x="610" y="206" fill="{cool_col}" font-size="8" text-anchor="middle" font-family="monospace">aftercooler</text>
+  <text x="610" y="219" fill="#8A9AA8" font-size="8" text-anchor="middle" font-family="monospace">{R2F(R['tCool']):.0f}°F out</text>
+  <text x="610" y="229" fill="#8A9AA8" font-size="7" text-anchor="middle" font-family="monospace">ε={R['effHX']*100:.0f}%</text>
+
+  <!-- Aftercooler → Sales -->
+  <line x1="650" y1="200" x2="750" y2="200" stroke="#4FD1C5" stroke-width="3" marker-end="url(#arr)"/>
+  <text x="698" y="190" fill="#4FD1C5" font-size="8" font-family="monospace">{R['qNet']:.1f} MSCFD</text>
+  <text x="750" y="196" fill="#4FD1C5" font-size="9" font-family="monospace">→ SALES</text>
+
+  <!-- NGL drop leg -->
+  <line x1="610" y1="235" x2="610" y2="290" stroke="#C2703F" stroke-width="2" marker-end="url(#arr)"/>
+  <text x="620" y="270" fill="#C2703F" font-size="8" font-family="monospace">{R['nglBbl']:.2f} bbl/d</text>
+  <text x="620" y="282" fill="#C2703F" font-size="8" font-family="monospace">NGL</text>
+
+  <!-- Motor M-301 -->
+  <rect x="490" y="255" width="90" height="40" rx="4" fill="#1B2530" stroke="#5B9BD5" stroke-width="1.5"/>
+  <text x="535" y="271" fill="#5B9BD5" font-size="9" text-anchor="middle" font-family="monospace">M-301</text>
+  <text x="535" y="284" fill="#8A9AA8" font-size="8" text-anchor="middle" font-family="monospace">{M['hp']} hp motor</text>
+  <!-- Motor shaft to compressor -->
+  <line x1="490" y1="275" x2="468" y2="215" stroke="#5B9BD5" stroke-width="1.5" stroke-dasharray="3,2"/>
+
+  <!-- Flux cloud -->
+  <ellipse cx="700" cy="360" rx="70" ry="30" fill="#0D1E2F" stroke="#5B9BD5" stroke-width="1.5" stroke-dasharray="4,3"/>
+  <text x="700" y="355" fill="#5B9BD5" font-size="10" text-anchor="middle" font-family="monospace" font-weight="bold">FLUX SCADA</text>
+  <text x="700" y="370" fill="#8A9AA8" font-size="8" text-anchor="middle" font-family="monospace">300 KPIs · remote</text>
+  <!-- PLC → Flux -->
+  <line x1="400" y1="375" x2="628" y2="365" stroke="#5B9BD5" stroke-width="1" stroke-dasharray="3,2"/>
+
+  <!-- Legend -->
+  <line x1="30" y1="400" x2="55" y2="400" stroke="#4FD1C5" stroke-width="2.5"/>
+  <text x="60" y="404" fill="#4FD1C5" font-size="8" font-family="monospace">vapour / gas</text>
+  <line x1="140" y1="400" x2="165" y2="400" stroke="#E4572E" stroke-width="2.5"/>
+  <text x="170" y="404" fill="#E4572E" font-size="8" font-family="monospace">hot discharge</text>
+  <line x1="260" y1="400" x2="285" y2="400" stroke="#F0A227" stroke-width="1.5" stroke-dasharray="4,3"/>
+  <text x="290" y="404" fill="#F0A227" font-size="8" font-family="monospace">4-20mA signal</text>
+  <line x1="390" y1="400" x2="415" y2="400" stroke="#5B9BD5" stroke-width="1.5" stroke-dasharray="3,2"/>
+  <text x="420" y="404" fill="#5B9BD5" font-size="8" font-family="monospace">comms / data</text>
+</svg>"""
+
+    svg = "\n".join(line.strip() for line in svg.splitlines())
+    st.markdown(svg, unsafe_allow_html=True)
+    st.divider()
+
+    # ── Control loop explainer ────────────────────────────────────────────────
+    col1, col2 = st.columns(2)
+    with col1:
+        st.markdown("#### How the control loop works")
+        st.markdown("""
+**1. Sense** — Pressure transmitter PT-101 reads tank pressure every second and sends a 4–20 mA signal to the Logix PLC.
+
+**2. Compare** — The PLC compares the measured pressure to the setpoint (typically +6 oz). The error drives a PID algorithm.
+
+**3. Act** — The PLC sends a speed command to the Variable Frequency Drive (VFD). The VFD changes motor frequency → shaft speed changes → more or less gas is compressed per minute.
+
+**4. Result** — Tank pressure returns toward setpoint. This loop runs continuously, correcting within seconds.
+
+**Versatrol** adds a second unloading path: a recycle valve that bypasses compressed gas back to suction, allowing 100% turndown without stalling the rotor.
+""")
+    with col2:
+        st.markdown("#### Multi-Stream™")
+        st.markdown("""
+**The problem:** a typical lease has both a production separator (60–200 psig) and a tank battery (near atmosphere). These two sources are at completely different pressures.
+
+**Old approach:** use two separate compressors, or throttle everything to the lower pressure (wasteful).
+
+**Multi-Stream™ (Flogistix patent):** a single Logix PLC controls two independent suction headers at different pressure targets. The compressor uses its Versatrol/VFD to serve both streams simultaneously, pulling down the tank vapour header while also accepting higher-pressure separator gas — without either stream backflowing into the other.
+
+**Why it matters:** one unit does the job of two. Lower capital cost, lower footprint, and the PLC automatically adjusts each stream's contribution as conditions change throughout the day.
+""")
+
+    st.divider()
+    st.markdown("#### Live control parameters")
+    c1, c2, c3, c4 = st.columns(4)
+    c1.metric("Tank pressure", f"{p['pTankOz']:.1f} oz", f"{p['pTankOz']-p['pSet']:.1f} oz vs setpoint")
+    c2.metric("VFD speed", f"{p['load']:.0f}%", f"{R['rpm']:.0f} rpm")
+    c3.metric("Compressor load", f"{R['hpPct']:.0f}%", f"{R['bhp']:.0f} / {M['hp']} hp")
+    c4.metric("Flux KPIs", "300 tracked", "98% uptime SLA")
+
+
+# ─────────────────────────────────────────────────────────────────────────────
 # Router
 # ─────────────────────────────────────────────────────────────────────────────
 if page == "3d":
@@ -2082,6 +2608,8 @@ elif page == "dashboard":
     page_dashboard()
 elif page == "simulator":
     page_simulator()
+elif page == "controls":
+    page_controls()
 elif page == "equations":
     page_equations()
 elif page == "lessons":
