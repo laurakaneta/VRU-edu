@@ -1,50 +1,66 @@
 # VRU Trainer
 
-Interactive teaching simulator for rotary-screw Vapor Recovery Units (VRUs), built to model Flogistix-pattern equipment. Combines a Streamlit dashboard with a Three.js 3D plant view, and exposes every underlying physics/thermo formula as an adjustable parameter.
+An interactive Streamlit teaching tool for Flogistix-pattern rotary screw
+**Vapor Recovery Units (VRUs)**. It models the physics, thermodynamics, and
+control logic of a real field VRU skid — flash gas, working/breathing losses,
+compressor sizing, discharge cooling, and PVRV venting — and pairs it with a
+live, clickable 3D view of the equipment.
 
-Physics engine: Peng-Robinson EOS, Rachford-Rice flash, Wilson K-values. No AI/ML — purely deterministic field-unit calculations.
+No AI/ML is involved anywhere in the app. Every number on screen comes from
+deterministic engineering calculations (Peng-Robinson equation of state,
+Rachford-Rice flash, Wilson K-values, AP-42 breathing-loss correlations,
+etc.), with an ideal-gas mode available for comparison.
 
-## Features
+## Files
 
-- **Dashboard** — live operating point: capture rate, vent losses, BHP, discharge temperature, CO2e
-- **Simulator** — sliders for every input parameter (tank pressure, load, compressor model, slide valve, etc.) with immediate recalculation
-- **How the Math Works** — full formula reference with unit derivations
-- **Guided Lessons** — step-by-step onboarding to VRU physics and combustion/thermo fundamentals
-- **Glossary** — searchable term reference
-- **3D Plant View** — interactive Three.js scene (orbit/pan/zoom, clickable equipment tags, live state pushed from the simulator) with a real-EOS/ideal-gas toggle
+| File | Purpose |
+|---|---|
+| `vru_app.py` | Main Streamlit application — all pages, physics, and UI |
+| `vru_3d_component.html` | Self-contained Three.js 3D scene, embedded into the app as a Streamlit HTML component |
+| `three_min.js` | Vendored copy of the Three.js r128 library (the same build is already bundled inline inside `vru_3d_component.html`, so this file is a reference/standalone copy rather than a separate runtime dependency) |
 
-## Project structure
-
-```
-vru-trainer/
-├── vru_app.py               # Streamlit app — all pages, sidebar, and the solve() physics engine
-├── vru_3d_component.html    # Self-contained Three.js 3D viewer, embedded via components.html
-├── requirements.txt         # Python dependencies
-└── docs/
-    └── audit-notes.md       # Formula audit log — units checked, two open fixes flagged
-```
-
-`vru_app.py` loads `vru_3d_component.html` from its own directory at runtime (`streamlit.components.v1.components.html`), so the two files must stay side by side — don't move one without the other.
-
-## Setup
+## Running it
 
 ```bash
-git clone <this-repo-url>
-cd vru-trainer
-pip install -r requirements.txt
+pip install streamlit
 streamlit run vru_app.py
 ```
 
-The app opens at `http://localhost:8501`.
+`vru_app.py` loads `vru_3d_component.html` from its own directory at
+runtime, so keep the two files together.
 
-## Known issues
+## App pages
 
-See `docs/audit-notes.md` for the full formula-by-formula audit. Two real fixes are flagged and still open:
+- **🏗️ 3D View** — Live Three.js render of the VRU skid (rotary screw
+  compressor, tanks, discharge cooler, flare/vent) with orbit/pan/zoom,
+  click-to-inspect equipment tags, cutaway mode, and animated flow
+  particles synced to the live process state.
+- **🏠 Dashboard** — At-a-glance readouts: gas generation, capture rate,
+  venting, BHP load, discharge temperature, alarms.
+- **🎛️ Simulator** — Guided and Expert modes for adjusting process inputs
+  and watching the whole system respond.
+- **🎛️ Control System** — PLC/PID-style control loop view.
+- **📐 Equations** — Every formula used in the model, with live numeric
+  substitution.
+- **📚 Guided Lessons** — Step-by-step teaching modules from zero
+  knowledge to VRU fluency, with quizzes.
+- **📖 Glossary** — Plain-English explanations (with analogies) for every
+  term and readout in the app.
+- **⚖️ Compare Models** — Side-by-side specs and trade-offs across the
+  Flogistix VRU lineup (VRX7, VRX15, VRX25, FX10V75 … FX20G).
 
-1. **Dead variable** (`vru_app.py` line 403) — `vi_eff = P_param = p["Vi"]` assigns an unused `P_param`. Cosmetic; safe to drop.
-2. **Slide valve not modeled in Python** (`vru_app.py` line 403) — the Python solver always uses the full `Vi` (equivalent to slide = 100%), while the JS 3D component correctly scales `viEff` by slide position. If a `slide` parameter is ever added to the Python sidebar, apply:
-   ```python
-   vi_eff = 1 + (p["Vi"] - 1) * (slide / 100.0)
-   ```
+## Physics notes
 
-All six focus-area formulas (discharge temp, NTU, qWork, breathing loss, fuel MSCFD, CO2e) were audited and confirmed unit-correct in both the Python and JS implementations.
+- Both an **ideal-gas** path and a **rigorous Peng-Robinson EOS** path are
+  implemented, with a toggle to compare them and see where the ideal-gas
+  assumption breaks down.
+- Field units throughout (psia, °F/°R, MSCFD, bbl/d) to match how the
+  equipment is actually specified and operated.
+- Every variable in every formula is exposed as an adjustable input, with
+  the effect immediately visible in the readouts and the 3D scene.
+
+## Purpose
+
+Built as a self-onboarding tool to learn VRU physics, combustion, and
+thermodynamics from the ground up while staying accurate to the specific
+VRU family used in the field.
