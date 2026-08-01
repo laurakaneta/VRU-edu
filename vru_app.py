@@ -32,7 +32,7 @@ st.markdown("""
 }
 /* alarm banners */
 .alarm-red  { background:#3A140A; border-left:4px solid #E4572E;
-              color:#F5B9A6; padding:8px 12px; border-radius:4px; margin-bottom:6px; font-size:0.85rem; }
+              color:#F5B9A6; padding:8px 12px; border-radius:4px; margin-bottom:6px; font-size:0.85rem; }h
 .alarm-warn { background:#3A2A0E; border-left:4px solid #F0A227;
               color:#F2CE8C; padding:8px 12px; border-radius:4px; margin-bottom:6px; font-size:0.85rem; }
 .alarm-ok   { background:#0E2B14; border-left:4px solid #6FBF73;
@@ -236,6 +236,210 @@ MODELS = {
     "FX12G":    {"label":"FX12 gas (92/135 hp)", "hp":135,  "driver":"gas",      "pdMax":350, "rpmRated":1800, "disp":0.3176, "Vi":3.5, "oilGpm":12,  "msMax":750},
     "FX17G":    {"label":"FX17 gas (188 hp)",    "hp":188,  "driver":"gas",      "pdMax":350, "rpmRated":1800, "disp":0.4200, "Vi":3.8, "oilGpm":18,  "msMax":1200},
     "FX20G":    {"label":"FX20 gas (276 hp)",    "hp":276,  "driver":"gas",      "pdMax":350, "rpmRated":1800, "disp":0.5800, "Vi":4.0, "oilGpm":22,  "msMax":2000},
+}
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Display-only specs for the Comparison page
+# Source: flowco-inc.com individual model pages, verified July 2026.
+# Fields not published publicly (dimensions, weight, connection size) are
+# marked None — the comparison page shows "Contact Flogistix" for those.
+# ─────────────────────────────────────────────────────────────────────────────
+MODEL_SPECS = {
+    # ── VRX Electric Series ────────────────────────────────────────────────
+    "VRX7": {
+        "display_name":  "VRX7",
+        "series":        "VRX Electric",
+        "hp_label":      "7.5 hp",
+        "motor_voltage": "460 V 3-phase",
+        "capacity_mscfd": 40,
+        "max_pressure_psig": 230,
+        "driver_detail": "Electric motor",
+        "control":       "Class I Div 2 Logix PLC + VFD",
+        "gear_choices":  None,
+        "variable_vi":   False,
+        "typical_app":   "Marginal / stripper wells",
+        "asme_vessels":  False,
+        "nace_option":   True,
+        "url":           "https://www.flowco-inc.com/products-services/vapor-recovery/electric-units/vrx7",
+    },
+    "VRX15": {
+        "display_name":  "VRX15",
+        "series":        "VRX Electric",
+        "hp_label":      "15 hp",
+        "motor_voltage": "460 V 3-phase",
+        "capacity_mscfd": 75,
+        "max_pressure_psig": 230,
+        "driver_detail": "Electric motor",
+        "control":       "Class I Div 2 Logix PLC + VFD",
+        "gear_choices":  None,
+        "variable_vi":   False,
+        "typical_app":   "Marginal / stripper wells",
+        "asme_vessels":  False,
+        "nace_option":   True,
+        "url":           "https://www.flowco-inc.com/products-services/vapor-recovery/electric-units/vrx15",
+    },
+    "VRX25": {
+        "display_name":  "VRX25",
+        "series":        "VRX Electric",
+        "hp_label":      "25 hp",
+        "motor_voltage": "460 V 3-phase",
+        "capacity_mscfd": 170,
+        "max_pressure_psig": 230,
+        "driver_detail": "Electric motor",
+        "control":       "Class I Div 2 Logix PLC + VFD",
+        "gear_choices":  None,
+        "variable_vi":   False,
+        "typical_app":   "Marginal / stripper wells",
+        "asme_vessels":  False,
+        "nace_option":   True,
+        "url":           "https://www.flowco-inc.com/products-services/vapor-recovery/electric-units/vrx25",
+    },
+    # ── FX Electric Series ─────────────────────────────────────────────────
+    "FX10V75": {
+        "display_name":  "FX10V75",
+        "series":        "FX Electric",
+        "hp_label":      "75 hp",
+        "motor_voltage": "460 V 3-phase",
+        "capacity_mscfd": 450,
+        "max_pressure_psig": 350,
+        "driver_detail": "Electric motor (LeRoi compressor)",
+        "control":       "Class I Div 2 Logix PLC + VFD",
+        "gear_choices":  None,
+        "variable_vi":   False,
+        "typical_app":   "Mid-volume production",
+        "asme_vessels":  False,
+        "nace_option":   True,
+        "url":           "https://www.flowco-inc.com/products-services/vapor-recovery/electric-units/fx10v75",
+    },
+    "FX12V125": {
+        "display_name":  "FX12V125",
+        "series":        "FX Electric",
+        "hp_label":      "75 / 125 hp",
+        "motor_voltage": "460 V 3-phase",
+        "capacity_mscfd": 850,
+        "max_pressure_psig": 350,
+        "driver_detail": "Electric motor (LeRoi compressor, integrated gear housing)",
+        "control":       "Class I Div 2 Logix PLC + VFD",
+        "gear_choices":  22,
+        "variable_vi":   False,
+        "typical_app":   "Mid-to-high volume production",
+        "asme_vessels":  False,
+        "nace_option":   True,
+        "url":           "https://www.flowco-inc.com/products-services/vapor-recovery/electric-units/fx12v125",
+    },
+    "FX17V150": {
+        "display_name":  "FX17V150",
+        "series":        "FX Electric",
+        "hp_label":      "150 hp",
+        "motor_voltage": "460 V 3-phase",
+        "capacity_mscfd": 1200,
+        "max_pressure_psig": 350,
+        "driver_detail": "Electric motor (LeRoi compressor, integrated gear housing)",
+        "control":       "Class I Div 2 Logix PLC + VFD",
+        "gear_choices":  17,
+        "variable_vi":   True,
+        "typical_app":   "High-volume / multi-well batteries",
+        "asme_vessels":  True,
+        "nace_option":   True,
+        "url":           "https://www.flowco-inc.com/products-services/vapor-recovery/electric-units/fx17v150",
+    },
+    "FX20V300": {
+        "display_name":  "FX20V300",
+        "series":        "FX Electric",
+        "hp_label":      "300 hp",
+        "motor_voltage": "460 V 3-phase",
+        "capacity_mscfd": 2000,
+        "max_pressure_psig": 350,
+        "driver_detail": "Electric motor (LeRoi compressor, integrated gear housing)",
+        "control":       "Class I Div 2 Logix PLC + VFD",
+        "gear_choices":  13,
+        "variable_vi":   False,
+        "typical_app":   "Large batteries / high-rate wells",
+        "asme_vessels":  False,
+        "nace_option":   True,
+        "url":           "https://www.flowco-inc.com/products-services/vapor-recovery/electric-units/fx20v300",
+    },
+    # ── FX Gas Engine Series ───────────────────────────────────────────────
+    "FX8G": {
+        "display_name":  "FX8",
+        "series":        "FX Gas",
+        "hp_label":      "72 hp",
+        "motor_voltage": "N/A — gas engine",
+        "capacity_mscfd": 150,
+        "max_pressure_psig": 230,
+        "driver_detail": "Natural gas engine",
+        "control":       "Logix PLC",
+        "gear_choices":  None,
+        "variable_vi":   False,
+        "typical_app":   "Remote sites without power; low-pressure service",
+        "asme_vessels":  False,
+        "nace_option":   True,
+        "url":           "https://www.flowco-inc.com/products-services/vapor-recovery/gas-units/fx8",
+    },
+    "FX10G": {
+        "display_name":  "FX10",
+        "series":        "FX Gas",
+        "hp_label":      "92 hp",
+        "motor_voltage": "N/A — gas engine",
+        "capacity_mscfd": 450,
+        "max_pressure_psig": 350,
+        "driver_detail": "Natural gas engine (LeRoi compressor)",
+        "control":       "Logix PLC",
+        "gear_choices":  None,
+        "variable_vi":   False,
+        "typical_app":   "Remote mid-volume production",
+        "asme_vessels":  False,
+        "nace_option":   True,
+        "url":           "https://www.flowco-inc.com/products-services/vapor-recovery/gas-units/fx10",
+    },
+    "FX12G": {
+        "display_name":  "FX12",
+        "series":        "FX Gas",
+        "hp_label":      "92 / 135 hp",
+        "motor_voltage": "N/A — gas engine",
+        "capacity_mscfd": 750,
+        "max_pressure_psig": 350,
+        "driver_detail": "Natural gas engine (LeRoi compressor, integrated gear housing)",
+        "control":       "Logix PLC",
+        "gear_choices":  22,
+        "variable_vi":   False,
+        "typical_app":   "Remote mid-to-high volume production",
+        "asme_vessels":  False,
+        "nace_option":   True,
+        "url":           "https://www.flowco-inc.com/products-services/vapor-recovery/gas-units/fx12",
+    },
+    "FX17G": {
+        "display_name":  "FX17",
+        "series":        "FX Gas",
+        "hp_label":      "188 hp",
+        "motor_voltage": "N/A — gas engine",
+        "capacity_mscfd": 1200,
+        "max_pressure_psig": 350,
+        "driver_detail": "Cummins G855C188 natural gas engine",
+        "control":       "Class I Div 2 Logix PLC + VFD",
+        "gear_choices":  17,
+        "variable_vi":   True,
+        "typical_app":   "High-volume remote production",
+        "asme_vessels":  False,
+        "nace_option":   True,
+        "url":           "https://www.flowco-inc.com/products-services/vapor-recovery/gas-units/fx17",
+    },
+    "FX20G": {
+        "display_name":  "FX20",
+        "series":        "FX Gas",
+        "hp_label":      "276 hp",
+        "motor_voltage": "N/A — gas engine",
+        "capacity_mscfd": 2000,
+        "max_pressure_psig": 350,
+        "driver_detail": "Natural gas engine (LeRoi compressor, integrated gear housing)",
+        "control":       "Class I Div 2 Logix PLC + VFD",
+        "gear_choices":  13,
+        "variable_vi":   False,
+        "typical_app":   "Largest remote batteries / high-rate wells",
+        "asme_vessels":  False,
+        "nace_option":   True,
+        "url":           "https://www.flowco-inc.com/products-services/vapor-recovery/gas-units/fx20",
+    },
 }
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -699,6 +903,7 @@ with st.sidebar:
         ("📐", "Equations",      "equations"),
         ("📚", "Guided Lessons", "lessons"),
         ("📖", "Glossary",       "glossary"),
+        ("⚖️", "Compare Models", "compare"),
     ]
     for icon, label, key in nav_pages:
         if st.button(f"{icon}  {label}", key=f"nav_{key}", use_container_width=True):
@@ -2437,130 +2642,240 @@ def page_controls():
     st.markdown(chips_html, unsafe_allow_html=True)
     st.divider()
 
-    # ── P&ID schematic (SVG) ──────────────────────────────────────────────────
-    tank_pct  = p["pTankOz"]
-    tank_col  = "#E4572E" if tank_pct > p["pPvrv"] or tank_pct < p["pVac"] else ("#F0A227" if abs(tank_pct - p["pSet"]) > 4 else "#6FBF73")
+    # ── Live control sliders — update the diagram on every change ────────────
+    st.markdown("**Adjust controls below — the diagram updates in real time:**")
+    sc1, sc2, sc3, sc4, sc5 = st.columns(5)
+    with sc1:
+        p["pTankOz"] = st.slider("Tank pressure (oz)", float(p["pVac"]), float(p["pPvrv"]) + 4.0,
+                                  float(p["pTankOz"]), 0.25, key="ctrl_tank")
+    with sc2:
+        p["load"] = st.slider("VFD speed (%)", 0.0, 100.0, float(p["load"]), 1.0, key="ctrl_load")
+    with sc3:
+        p["pSep"] = st.slider("Sep. pressure (psig)", 15, 250, int(p["pSep"]), 5, key="ctrl_sep")
+    with sc4:
+        p["pSales"] = st.slider("Sales pressure (psig)", 20, 400, int(p["pSales"]), 5, key="ctrl_sales")
+    with sc5:
+        p["qLiq"] = st.slider("Liquid rate (bbl/d)", 50, 30000, int(p["qLiq"]), 100, key="ctrl_qliq")
+
+    # Re-solve with updated params so diagram reflects slider values
+    R = solve(p, feed_pct, p["use_real"])
+
+    # ── P&ID schematic (SVG) — live animated control loop ──────────────────────
+    import streamlit.components.v1 as components
+    tank_col  = "#E4572E" if p["pTankOz"] > p["pPvrv"] or p["pTankOz"] < p["pVac"] else ("#F0A227" if abs(p["pTankOz"] - p["pSet"]) > 4 else "#6FBF73")
     comp_col  = "#E4572E" if R["hpPct"] > 100 else ("#F0A227" if R["hpPct"] > 85 else "#6FBF73")
     td_col    = "#E4572E" if R2F(R["td"]) > 340 else ("#F0A227" if R2F(R["td"]) > 280 else "#6FBF73")
     cool_col  = "#5B9BD5"
+    # Error signal drives the animated dash speed on control wires
+    err       = abs(p["pTankOz"] - p["pSet"])
+    sig_speed = f"{max(0.3, 2.0 - err * 0.15):.2f}s"   # fast signal when error is large
+    # Tank fill level bar (visual)
+    fill_h    = int(80 * p["level"] / 100)
+    fill_y    = 220 - fill_h
+    # Venting indicator
+    venting   = R["qVent"] > 0.05
+    vent_col  = "#E4572E" if venting else "#2E3B49"
+    vent_opac = "1" if venting else "0.25"
 
     svg = f"""
-<svg viewBox="0 0 820 420" xmlns="http://www.w3.org/2000/svg"
-     style="width:100%;background:#0C1218;border-radius:6px;border:1px solid #2E3B49">
+<svg viewBox="0 0 1000 640" xmlns="http://www.w3.org/2000/svg"
+     style="width:100%;background:#0C1218;border-radius:6px;border:1px solid #2E3B49;font-family:sans-serif">
   <defs>
-    <marker id="arr" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
-      <polygon points="0 0, 8 3, 0 6" fill="#4FD1C5"/>
-    </marker>
-    <marker id="arr2" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
-      <polygon points="0 0, 8 3, 0 6" fill="#F0A227"/>
-    </marker>
+    <marker id="arr"  markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#4FD1C5"/></marker>
+    <marker id="arrR" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#E4572E"/></marker>
+    <marker id="arrY" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#F0A227"/></marker>
+    <marker id="arrB" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#5B9BD5"/></marker>
+    <style>
+      .sig-wire {{ stroke-dasharray:6,4; animation:dash {sig_speed} linear infinite; }}
+      .slow-wire {{ stroke-dasharray:4,4; animation:dash 1.8s linear infinite; }}
+      @keyframes dash {{ to {{ stroke-dashoffset:-20; }} }}
+      .pulse {{ animation:pulse 1.4s ease-in-out infinite; }}
+      @keyframes pulse {{ 0%,100%{{opacity:.6}} 50%{{opacity:1}} }}
+      .lbl {{ font-size:9px; fill:#E6EDF3; font-weight:600; }}
+      .sub {{ font-size:7px; fill:#8A9AA8; }}
+      .tag {{ font-size:7px; fill:#63727F; }}
+    </style>
   </defs>
 
-  <!-- Tank battery -->
-  <rect x="30" y="140" width="90" height="120" rx="4" fill="#1B2530" stroke="{tank_col}" stroke-width="2"/>
-  <text x="75" y="135" fill="#8A9AA8" font-size="10" text-anchor="middle" font-family="monospace">TANK BATTERY</text>
-  <text x="75" y="175" fill="{tank_col}" font-size="13" text-anchor="middle" font-family="monospace" font-weight="bold">{p['pTankOz']:.1f} oz</text>
-  <text x="75" y="192" fill="#8A9AA8" font-size="9" text-anchor="middle" font-family="monospace">tank pressure</text>
-  <text x="75" y="218" fill="#8A9AA8" font-size="9" text-anchor="middle" font-family="monospace">PVRV: {p['pPvrv']:.0f} oz</text>
-  <text x="75" y="232" fill="#8A9AA8" font-size="9" text-anchor="middle" font-family="monospace">Vac: {p['pVac']:.0f} oz</text>
-  <text x="75" y="248" fill="#8A9AA8" font-size="9" text-anchor="middle" font-family="monospace">Set: {p['pSet']:.0f} oz</text>
+  <!-- ── step banners ── -->
+  <rect x="10"  y="8" width="140" height="16" rx="3" fill="#1B2530"/>
+  <text x="80"  y="19" fill="#F0A227" font-size="8" text-anchor="middle" font-weight="bold">① SENSE pressure</text>
+  <rect x="158" y="8" width="135" height="16" rx="3" fill="#1B2530"/>
+  <text x="225" y="19" fill="#F0A227" font-size="8" text-anchor="middle" font-weight="bold">② BRAIN decides speed</text>
+  <rect x="300" y="8" width="110" height="16" rx="3" fill="#1B2530"/>
+  <text x="355" y="19" fill="#F0A227" font-size="8" text-anchor="middle" font-weight="bold">③ MOTOR drives screw</text>
+  <rect x="418" y="8" width="110" height="16" rx="3" fill="#1B2530"/>
+  <text x="473" y="19" fill="#F0A227" font-size="8" text-anchor="middle" font-weight="bold">④ SCREW compresses</text>
+  <rect x="536" y="8" width="120" height="16" rx="3" fill="#1B2530"/>
+  <text x="596" y="19" fill="#F0A227" font-size="8" text-anchor="middle" font-weight="bold">⑤ COOL &amp; separate</text>
+  <rect x="664" y="8" width="90" height="16" rx="3" fill="#1B2530"/>
+  <text x="709" y="19" fill="#F0A227" font-size="8" text-anchor="middle" font-weight="bold">⑥ SELL gas</text>
 
-  <!-- PT transmitter -->
-  <circle cx="75" cy="290" r="14" fill="#1B2530" stroke="#F0A227" stroke-width="1.5"/>
-  <text x="75" y="295" fill="#F0A227" font-size="9" text-anchor="middle" font-family="monospace">PT-101</text>
-  <line x1="75" y1="260" x2="75" y2="276" stroke="#F0A227" stroke-width="1.5"/>
+  <!-- ══ STOCK TANK ═══════════════════════════════════════════════ -->
+  <!-- plain-English label above -->
+  <text x="75" y="44" fill="#E6EDF3" font-size="10" text-anchor="middle" font-weight="bold">Stock Tank</text>
+  <text x="75" y="56" fill="#8A9AA8" font-size="7" text-anchor="middle">Oil sits here. Gas boils off the top.</text>
+  <!-- shell -->
+  <rect x="28" y="62" width="94" height="148" rx="4" fill="#111820" stroke="{tank_col}" stroke-width="2"/>
+  <!-- liquid fill bar -->
+  <rect x="30" y="{fill_y + 10}" width="90" height="{fill_h}" rx="2" fill="#1E3A4A" opacity="0.8"/>
+  <text x="75" y="{fill_y + 6}" fill="#4A8FA8" font-size="7" text-anchor="middle">{p['level']:.0f}% full of oil</text>
+  <!-- big pressure number -->
+  <text x="75" y="94" fill="{tank_col}" font-size="15" text-anchor="middle" font-weight="bold">{p['pTankOz']:.1f} oz</text>
+  <text x="75" y="106" fill="#8A9AA8" font-size="7" text-anchor="middle">gas pressure inside</text>
+  <text x="75" y="120" fill="#6FBF73" font-size="7" text-anchor="middle">target: {p['pSet']:.0f} oz</text>
+  <text x="75" y="132" fill="#F0A227" font-size="7" text-anchor="middle">pop-off valve: {p['pPvrv']:.0f} oz</text>
+  <text x="75" y="144" fill="#63727F" font-size="7" text-anchor="middle">vacuum breaker: {p['pVac']:.0f} oz</text>
+  <!-- PVRV vent -->
+  <g opacity="{vent_opac}">
+    <line x1="75" y1="62" x2="75" y2="36" stroke="{vent_col}" stroke-width="2" marker-end="url(#arrR)"/>
+    <text x="82" y="48" fill="{vent_col}" font-size="7" font-weight="bold">⚠ VENTING!</text>
+    <text x="82" y="58" fill="{vent_col}" font-size="7">{R['qVent']:.2f} MSCFD lost</text>
+  </g>
 
-  <!-- Signal line PT → PLC -->
-  <line x1="89" y1="290" x2="310" y2="350" stroke="#F0A227" stroke-width="1" stroke-dasharray="4,3"/>
-  <text x="185" y="338" fill="#F0A227" font-size="8" font-family="monospace">4-20 mA signal</text>
+  <!-- gas pipe: tank → scrubber -->
+  <text x="75" y="225" fill="#8A9AA8" font-size="7" text-anchor="middle">gas vapour</text>
+  <text x="75" y="234" fill="#8A9AA8" font-size="7" text-anchor="middle">rises off oil</text>
+  <line x1="75" y1="62" x2="75" y2="242" stroke="#4FD1C5" stroke-width="1" stroke-dasharray="3,3"/>
+  <line x1="75" y1="242" x2="200" y2="242" stroke="#4FD1C5" stroke-width="3" marker-end="url(#arr)"/>
+  <text x="135" y="235" fill="#4FD1C5" font-size="8" font-weight="bold">{R['qGen']:.1f} MSCFD</text>
+  <text x="135" y="254" fill="#63727F" font-size="7">gas flow rate</text>
 
-  <!-- Logix PLC box -->
-  <rect x="280" y="340" width="120" height="55" rx="4" fill="#1B2530" stroke="#F0A227" stroke-width="2"/>
-  <text x="340" y="358" fill="#F0A227" font-size="10" text-anchor="middle" font-family="monospace" font-weight="bold">LOGIX PLC</text>
-  <text x="340" y="372" fill="#8A9AA8" font-size="8" text-anchor="middle" font-family="monospace">Cl.1 Div.2</text>
-  <text x="340" y="386" fill="#8A9AA8" font-size="8" text-anchor="middle" font-family="monospace">PID control</text>
+  <!-- ══ INLET SCRUBBER ═══════════════════════════════════════════ -->
+  <text x="226" y="195" fill="#E6EDF3" font-size="9" text-anchor="middle" font-weight="bold">Inlet Scrubber</text>
+  <text x="226" y="206" fill="#8A9AA8" font-size="7" text-anchor="middle">Knocks out liquid</text>
+  <text x="226" y="215" fill="#8A9AA8" font-size="7" text-anchor="middle">drops before compressor</text>
+  <rect x="200" y="222" width="52" height="60" rx="22" fill="#1B2530" stroke="#7A8794" stroke-width="1.5"/>
+  <text x="226" y="248" fill="#8A9AA8" font-size="8" text-anchor="middle">V-201</text>
+  <text x="226" y="260" fill="#63727F" font-size="7" text-anchor="middle">scrubber</text>
+  <!-- scrubber → compressor -->
+  <line x1="252" y1="252" x2="330" y2="252" stroke="#4FD1C5" stroke-width="3" marker-end="url(#arr)"/>
+  <text x="289" y="245" fill="#4FD1C5" font-size="8">{R['Ps']:.1f} psia</text>
+  <text x="289" y="263" fill="#63727F" font-size="7">suction pressure</text>
 
-  <!-- PLC → VFD signal -->
-  <line x1="400" y1="367" x2="490" y2="367" stroke="#4FD1C5" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arr)"/>
-  <text x="442" y="360" fill="#4FD1C5" font-size="8" font-family="monospace">speed cmd</text>
+  <!-- ══ ROTARY SCREW COMPRESSOR ══════════════════════════════════ -->
+  <text x="390" y="195" fill="#E6EDF3" font-size="9" text-anchor="middle" font-weight="bold">Rotary Screw Compressor</text>
+  <text x="390" y="206" fill="#8A9AA8" font-size="7" text-anchor="middle">Two helical screws squeeze the gas</text>
+  <text x="390" y="215" fill="#8A9AA8" font-size="7" text-anchor="middle">from low to high pressure</text>
+  <ellipse cx="390" cy="252" rx="42" ry="42" fill="#1B2530" stroke="{comp_col}" stroke-width="2.5"/>
+  <text x="390" y="245" fill="{comp_col}" font-size="11" text-anchor="middle" font-weight="bold">SCREW</text>
+  <text x="390" y="258" fill="#8A9AA8" font-size="8" text-anchor="middle">{R['bhp']:.0f} horsepower</text>
+  <text x="390" y="270" fill="{comp_col}" font-size="8" text-anchor="middle">{R['hpPct']:.0f}% of max load</text>
+  <text x="390" y="281" fill="#8A9AA8" font-size="7" text-anchor="middle">{R['rpm']:.0f} rpm  ·  r={R['r']:.1f}</text>
 
-  <!-- VFD box -->
-  <rect x="490" y="340" width="90" height="55" rx="4" fill="#1B2530" stroke="#4FD1C5" stroke-width="1.5"/>
-  <text x="535" y="358" fill="#4FD1C5" font-size="10" text-anchor="middle" font-family="monospace" font-weight="bold">VFD</text>
-  <text x="535" y="372" fill="#8A9AA8" font-size="8" text-anchor="middle" font-family="monospace">{p['load']:.0f}% speed</text>
-  <text x="535" y="386" fill="#8A9AA8" font-size="8" text-anchor="middle" font-family="monospace">{R['kW']:.0f} kW draw</text>
+  <!-- ══ ELECTRIC MOTOR ════════════════════════════════════════════ -->
+  <text x="390" y="318" fill="#E6EDF3" font-size="9" text-anchor="middle" font-weight="bold">Electric Motor</text>
+  <text x="390" y="328" fill="#8A9AA8" font-size="7" text-anchor="middle">Spins the screw. Speed set by VFD.</text>
+  <rect x="352" y="333" width="76" height="32" rx="4" fill="#1B2530" stroke="#5B9BD5" stroke-width="1.5"/>
+  <text x="390" y="347" fill="#5B9BD5" font-size="9" text-anchor="middle">MOTOR</text>
+  <text x="390" y="359" fill="#8A9AA8" font-size="7" text-anchor="middle">{M['hp']} hp nameplate</text>
+  <!-- shaft connecting motor to screw -->
+  <line x1="390" y1="333" x2="390" y2="294" stroke="#5B9BD5" stroke-width="2" stroke-dasharray="3,2" marker-end="url(#arrB)"/>
+  <text x="400" y="315" fill="#5B9BD5" font-size="7">drive shaft</text>
 
-  <!-- VFD → Motor -->
-  <line x1="535" y1="340" x2="535" y2="290" stroke="#4FD1C5" stroke-width="1.5" marker-end="url(#arr)"/>
+  <!-- ══ HOT GAS PIPE → AFTERCOOLER ════════════════════════════════ -->
+  <line x1="432" y1="252" x2="530" y2="252" stroke="#E4572E" stroke-width="3" marker-end="url(#arrR)"/>
+  <text x="479" y="244" fill="#E4572E" font-size="8" font-weight="bold">{R2F(R['td']):.0f}°F HOT</text>
+  <text x="479" y="265" fill="#63727F" font-size="7">{R['Pd']-PSTD:.0f} psig compressed</text>
 
-  <!-- Vapour header pipe: tank → scrubber -->
-  <line x1="120" y1="200" x2="240" y2="200" stroke="#4FD1C5" stroke-width="3" marker-end="url(#arr)"/>
-  <text x="178" y="193" fill="#4FD1C5" font-size="8" font-family="monospace">{R['qGen']:.1f} MSCFD</text>
+  <!-- ══ AFTERCOOLER ════════════════════════════════════════════════ -->
+  <text x="572" y="195" fill="#E6EDF3" font-size="9" text-anchor="middle" font-weight="bold">Aftercooler</text>
+  <text x="572" y="206" fill="#8A9AA8" font-size="7" text-anchor="middle">Air-cooled heat exchanger.</text>
+  <text x="572" y="215" fill="#8A9AA8" font-size="7" text-anchor="middle">Cools gas so heavy ends condense.</text>
+  <rect x="530" y="222" width="84" height="60" rx="4" fill="#1B2530" stroke="{cool_col}" stroke-width="1.5"/>
+  <text x="572" y="242" fill="{cool_col}" font-size="9" text-anchor="middle">COOLER</text>
+  <text x="572" y="254" fill="#8A9AA8" font-size="7" text-anchor="middle">{R2F(R['td']):.0f}°F in</text>
+  <text x="572" y="265" fill="{cool_col}" font-size="7" text-anchor="middle">{R2F(R['tCool']):.0f}°F out  ε={R['effHX']*100:.0f}%</text>
 
-  <!-- Scrubber V-201 -->
-  <rect x="240" y="165" width="55" height="75" rx="26" fill="#1B2530" stroke="#7A8794" stroke-width="1.5"/>
-  <text x="267" y="196" fill="#8A9AA8" font-size="9" text-anchor="middle" font-family="monospace">V-201</text>
-  <text x="267" y="210" fill="#8A9AA8" font-size="8" text-anchor="middle" font-family="monospace">scrubber</text>
+  <!-- NGL / condensate drop -->
+  <line x1="572" y1="282" x2="572" y2="350" stroke="#C2703F" stroke-width="2" marker-end="url(#arr)"/>
+  <text x="582" y="305" fill="#E6EDF3" font-size="8" font-weight="bold">Free Liquid!</text>
+  <text x="582" y="317" fill="#C2703F" font-size="8">{R['nglBbl']:.2f} bbl/day</text>
+  <text x="582" y="329" fill="#8A9AA8" font-size="7">Heavy hydrocarbons</text>
+  <text x="582" y="340" fill="#8A9AA8" font-size="7">condense out here</text>
+  <rect x="545" y="350" width="54" height="20" rx="3" fill="#1B2530" stroke="#C2703F" stroke-width="1"/>
+  <text x="572" y="364" fill="#C2703F" font-size="7" text-anchor="middle">NGL drum</text>
 
-  <!-- Scrubber → Compressor -->
-  <line x1="295" y1="200" x2="390" y2="200" stroke="#4FD1C5" stroke-width="3" marker-end="url(#arr)"/>
-  <text x="337" y="193" fill="#4FD1C5" font-size="8" font-family="monospace">{R['Ps']:.1f} psia</text>
+  <!-- cooled gas → sales -->
+  <line x1="614" y1="252" x2="760" y2="252" stroke="#4FD1C5" stroke-width="3" marker-end="url(#arr)"/>
+  <text x="685" y="244" fill="#4FD1C5" font-size="9" font-weight="bold">{R['qNet']:.1f} MSCFD</text>
+  <text x="685" y="264" fill="#63727F" font-size="7">cooled, clean gas</text>
+  <rect x="760" y="238" width="70" height="28" rx="4" fill="#0E2B14" stroke="#6FBF73" stroke-width="1.5"/>
+  <text x="795" y="251" fill="#6FBF73" font-size="9" text-anchor="middle" font-weight="bold">SALES</text>
+  <text x="795" y="262" fill="#8A9AA8" font-size="7" text-anchor="middle">${R['revGas']:.0f}/day</text>
 
-  <!-- Compressor C-301 -->
-  <ellipse cx="430" cy="200" rx="38" ry="38" fill="#1B2530" stroke="{comp_col}" stroke-width="2"/>
-  <text x="430" y="196" fill="{comp_col}" font-size="10" text-anchor="middle" font-family="monospace" font-weight="bold">C-301</text>
-  <text x="430" y="210" fill="#8A9AA8" font-size="8" text-anchor="middle" font-family="monospace">{R['bhp']:.0f} BHP</text>
-  <text x="430" y="222" fill="#8A9AA8" font-size="8" text-anchor="middle" font-family="monospace">{R['hpPct']:.0f}%</text>
+  <!-- ══ PRESSURE TRANSMITTER ═══════════════════════════════════════ -->
+  <text x="75" y="470" fill="#E6EDF3" font-size="9" text-anchor="middle" font-weight="bold">Pressure Sensor (PT-101)</text>
+  <text x="75" y="481" fill="#8A9AA8" font-size="7" text-anchor="middle">Reads tank pressure every second.</text>
+  <text x="75" y="491" fill="#8A9AA8" font-size="7" text-anchor="middle">Sends a 4–20 mA signal to the PLC.</text>
+  <circle cx="75" cy="510" r="18" fill="#1B2530" stroke="#F0A227" stroke-width="2" class="pulse"/>
+  <text x="75" y="507" fill="#F0A227" font-size="9" text-anchor="middle" font-weight="bold">PT</text>
+  <text x="75" y="518" fill="#F0A227" font-size="7" text-anchor="middle">101</text>
+  <!-- wire from tank down to PT -->
+  <line x1="75" y1="210" x2="75" y2="492" stroke="#F0A227" stroke-width="1.5"/>
 
-  <!-- Compressor → Aftercooler (hot discharge) -->
-  <line x1="468" y1="200" x2="570" y2="200" stroke="#E4572E" stroke-width="3" marker-end="url(#arr)"/>
-  <text x="512" y="190" fill="#E4572E" font-size="8" font-family="monospace">{R2F(R['td']):.0f}°F</text>
-  <text x="512" y="216" fill="#8A9AA8" font-size="8" font-family="monospace">{R['Pd']-PSTD:.0f} psig</text>
+  <!-- PT → PLC animated signal wire -->
+  <line x1="93" y1="510" x2="238" y2="510" stroke="#F0A227" stroke-width="2"
+        class="sig-wire" marker-end="url(#arrY)"/>
+  <text x="164" y="502" fill="#F0A227" font-size="7" font-weight="bold">4-20 mA signal</text>
+  <text x="164" y="523" fill="#63727F" font-size="7">(wire carries pressure reading)</text>
 
-  <!-- Aftercooler E-401 -->
-  <rect x="570" y="165" width="80" height="70" rx="4" fill="#1B2530" stroke="{cool_col}" stroke-width="1.5"/>
-  <text x="610" y="193" fill="{cool_col}" font-size="9" text-anchor="middle" font-family="monospace">E-401</text>
-  <text x="610" y="206" fill="{cool_col}" font-size="8" text-anchor="middle" font-family="monospace">aftercooler</text>
-  <text x="610" y="219" fill="#8A9AA8" font-size="8" text-anchor="middle" font-family="monospace">{R2F(R['tCool']):.0f}°F out</text>
-  <text x="610" y="229" fill="#8A9AA8" font-size="7" text-anchor="middle" font-family="monospace">ε={R['effHX']*100:.0f}%</text>
+  <!-- ══ LOGIX PLC ════════════════════════════════════════════════════ -->
+  <text x="315" y="470" fill="#E6EDF3" font-size="9" text-anchor="middle" font-weight="bold">Logix PLC  (the Brain)</text>
+  <text x="315" y="481" fill="#8A9AA8" font-size="7" text-anchor="middle">Compares actual vs target pressure.</text>
+  <text x="315" y="491" fill="#8A9AA8" font-size="7" text-anchor="middle">Calculates the right motor speed.</text>
+  <rect x="248" y="496" width="134" height="46" rx="4" fill="#1B2530" stroke="#F0A227" stroke-width="2"/>
+  <text x="315" y="512" fill="#F0A227" font-size="10" text-anchor="middle" font-weight="bold">LOGIX PLC</text>
+  <text x="315" y="525" fill="#8A9AA8" font-size="8" text-anchor="middle">error: {p['pTankOz']-p['pSet']:+.1f} oz  →  {p['load']:.0f}% speed</text>
+  <text x="315" y="536" fill="#63727F" font-size="7" text-anchor="middle">target: {p['pSet']:.0f} oz   actual: {p['pTankOz']:.1f} oz</text>
 
-  <!-- Aftercooler → Sales -->
-  <line x1="650" y1="200" x2="750" y2="200" stroke="#4FD1C5" stroke-width="3" marker-end="url(#arr)"/>
-  <text x="698" y="190" fill="#4FD1C5" font-size="8" font-family="monospace">{R['qNet']:.1f} MSCFD</text>
-  <text x="750" y="196" fill="#4FD1C5" font-size="9" font-family="monospace">→ SALES</text>
+  <!-- PLC → VFD animated wire -->
+  <line x1="382" y1="519" x2="456" y2="519" stroke="#4FD1C5" stroke-width="2"
+        class="sig-wire" marker-end="url(#arr)"/>
+  <text x="417" y="511" fill="#4FD1C5" font-size="7" font-weight="bold">speed command</text>
+  <text x="417" y="531" fill="#63727F" font-size="7">(tells VFD what % to run)</text>
 
-  <!-- NGL drop leg -->
-  <line x1="610" y1="235" x2="610" y2="290" stroke="#C2703F" stroke-width="2" marker-end="url(#arr)"/>
-  <text x="620" y="270" fill="#C2703F" font-size="8" font-family="monospace">{R['nglBbl']:.2f} bbl/d</text>
-  <text x="620" y="282" fill="#C2703F" font-size="8" font-family="monospace">NGL</text>
+  <!-- ══ VFD ════════════════════════════════════════════════════════ -->
+  <text x="540" y="470" fill="#E6EDF3" font-size="9" text-anchor="middle" font-weight="bold">VFD  (Variable Freq. Drive)</text>
+  <text x="540" y="481" fill="#8A9AA8" font-size="7" text-anchor="middle">Changes motor speed by varying</text>
+  <text x="540" y="491" fill="#8A9AA8" font-size="7" text-anchor="middle">the electrical frequency (Hz).</text>
+  <rect x="476" y="496" width="128" height="46" rx="4" fill="#1B2530" stroke="#4FD1C5" stroke-width="2"/>
+  <text x="540" y="512" fill="#4FD1C5" font-size="10" text-anchor="middle" font-weight="bold">VFD</text>
+  <text x="540" y="525" fill="#8A9AA8" font-size="8" text-anchor="middle">{p['load']:.0f}% speed  ·  {R['kW']:.0f} kW</text>
+  <text x="540" y="536" fill="#63727F" font-size="7" text-anchor="middle">{R['rpm']:.0f} rpm  ·  {R['bhp']:.0f} BHP used</text>
 
-  <!-- Motor M-301 -->
-  <rect x="490" y="255" width="90" height="40" rx="4" fill="#1B2530" stroke="#5B9BD5" stroke-width="1.5"/>
-  <text x="535" y="271" fill="#5B9BD5" font-size="9" text-anchor="middle" font-family="monospace">M-301</text>
-  <text x="535" y="284" fill="#8A9AA8" font-size="8" text-anchor="middle" font-family="monospace">{M['hp']} hp motor</text>
-  <!-- Motor shaft to compressor -->
-  <line x1="490" y1="275" x2="468" y2="215" stroke="#5B9BD5" stroke-width="1.5" stroke-dasharray="3,2"/>
+  <!-- VFD → Motor animated power wire -->
+  <line x1="540" y1="496" x2="540" y2="420" stroke="#4FD1C5" stroke-width="2"
+        class="slow-wire" marker-end="url(#arrB)"/>
+  <line x1="540" y1="420" x2="430" y2="365" stroke="#4FD1C5" stroke-width="2" marker-end="url(#arrB)"/>
+  <text x="490" y="410" fill="#4FD1C5" font-size="7">AC power to motor</text>
 
-  <!-- Flux cloud -->
-  <ellipse cx="700" cy="360" rx="70" ry="30" fill="#0D1E2F" stroke="#5B9BD5" stroke-width="1.5" stroke-dasharray="4,3"/>
-  <text x="700" y="355" fill="#5B9BD5" font-size="10" text-anchor="middle" font-family="monospace" font-weight="bold">FLUX SCADA</text>
-  <text x="700" y="370" fill="#8A9AA8" font-size="8" text-anchor="middle" font-family="monospace">300 KPIs · remote</text>
-  <!-- PLC → Flux -->
-  <line x1="400" y1="375" x2="628" y2="365" stroke="#5B9BD5" stroke-width="1" stroke-dasharray="3,2"/>
+  <!-- PLC → Flux SCADA comms wire -->
+  <line x1="382" y1="535" x2="708" y2="570" stroke="#5B9BD5" stroke-width="1"
+        class="slow-wire" stroke-dasharray="3,3" marker-end="url(#arrB)"/>
 
-  <!-- Legend -->
-  <line x1="30" y1="400" x2="55" y2="400" stroke="#4FD1C5" stroke-width="2.5"/>
-  <text x="60" y="404" fill="#4FD1C5" font-size="8" font-family="monospace">vapour / gas</text>
-  <line x1="140" y1="400" x2="165" y2="400" stroke="#E4572E" stroke-width="2.5"/>
-  <text x="170" y="404" fill="#E4572E" font-size="8" font-family="monospace">hot discharge</text>
-  <line x1="260" y1="400" x2="285" y2="400" stroke="#F0A227" stroke-width="1.5" stroke-dasharray="4,3"/>
-  <text x="290" y="404" fill="#F0A227" font-size="8" font-family="monospace">4-20mA signal</text>
-  <line x1="390" y1="400" x2="415" y2="400" stroke="#5B9BD5" stroke-width="1.5" stroke-dasharray="3,2"/>
-  <text x="420" y="404" fill="#5B9BD5" font-size="8" font-family="monospace">comms / data</text>
+  <!-- ══ FLUX SCADA ════════════════════════════════════════════════ -->
+  <ellipse cx="790" cy="560" rx="80" ry="28" fill="#0D1E2F" stroke="#5B9BD5" stroke-width="1.5" stroke-dasharray="4,3"/>
+  <text x="790" y="555" fill="#5B9BD5" font-size="9" text-anchor="middle" font-weight="bold">FLUX SCADA</text>
+  <text x="790" y="568" fill="#8A9AA8" font-size="7" text-anchor="middle">Remote monitoring · 300 live values</text>
+
+  <!-- ══ LEGEND ════════════════════════════════════════════════════ -->
+  <rect x="10" y="604" width="980" height="28" rx="2" fill="#111820"/>
+  <line x1="18" y1="614" x2="38" y2="614" stroke="#4FD1C5" stroke-width="2.5"/>
+  <text x="43" y="618" fill="#4FD1C5" font-size="7">gas / vapour flow</text>
+  <line x1="155" y1="614" x2="175" y2="614" stroke="#E4572E" stroke-width="2.5"/>
+  <text x="180" y="618" fill="#E4572E" font-size="7">hot compressed gas</text>
+  <line x1="300" y1="614" x2="320" y2="614" stroke="#F0A227" stroke-width="1.5" stroke-dasharray="4,3"/>
+  <text x="325" y="618" fill="#F0A227" font-size="7">pressure signal (animated = live data)</text>
+  <line x1="560" y1="614" x2="580" y2="614" stroke="#4FD1C5" stroke-width="1.5" stroke-dasharray="4,3"/>
+  <text x="585" y="618" fill="#4FD1C5" font-size="7">speed command (animated = live data)</text>
+  <line x1="800" y1="614" x2="820" y2="614" stroke="#C2703F" stroke-width="2"/>
+  <text x="825" y="618" fill="#C2703F" font-size="7">liquid NGL</text>
+  <text x="18" y="628" fill="#63727F" font-size="7">Wire animation speed = how hard the control loop is working. Faster = bigger pressure error.</text>
 </svg>"""
 
-    svg = "\n".join(line.strip() for line in svg.splitlines())
-    st.markdown(svg, unsafe_allow_html=True)
+    pid_html = f"""<!DOCTYPE html><html><body style="margin:0;padding:0;background:#0C1218">{svg}</body></html>"""
+    components.html(pid_html, height=780, scrolling=False)
     st.divider()
 
     # ── Control loop explainer ────────────────────────────────────────────────
@@ -2591,13 +2906,562 @@ def page_controls():
 """)
 
     st.divider()
-    st.markdown("#### Live control parameters")
-    c1, c2, c3, c4 = st.columns(4)
-    c1.metric("Tank pressure", f"{p['pTankOz']:.1f} oz", f"{p['pTankOz']-p['pSet']:.1f} oz vs setpoint")
-    c2.metric("VFD speed", f"{p['load']:.0f}%", f"{R['rpm']:.0f} rpm")
-    c3.metric("Compressor load", f"{R['hpPct']:.0f}%", f"{R['bhp']:.0f} / {M['hp']} hp")
-    c4.metric("Flux KPIs", "300 tracked", "98% uptime SLA")
+    st.markdown("#### Live values — calculated from current slider positions")
+    c1, c2, c3, c4, c5, c6 = st.columns(6)
+    err_oz = p["pTankOz"] - p["pSet"]
+    c1.metric("Tank pressure",   f"{p['pTankOz']:.1f} oz",  f"{err_oz:+.1f} oz vs SP")
+    c2.metric("Gas generated",   f"{R['qGen']:.1f} MSCFD",  f"flash {R['qFlash']:.1f} + work {R['qWork']:.1f}")
+    c3.metric("VFD speed",       f"{p['load']:.0f}%",       f"{R['rpm']:.0f} rpm")
+    c4.metric("Compressor load", f"{R['hpPct']:.0f}%",      f"{R['bhp']:.0f} / {M['hp']} hp")
+    c5.metric("Discharge temp",  f"{R2F(R['td']):.0f} °F",  f"dry: {R2F(R['tdDry']):.0f} °F")
+    c6.metric("Net to sales",    f"{R['qNet']:.1f} MSCFD",  f"${R['netDay']:.0f}/day")
+    # Control state explanation
+    if R["qVent"] > 0.05:
+        st.error(f"🚨 VENTING {R['qVent']:.2f} MSCFD — tank pressure {p['pTankOz']:.1f} oz exceeds PVRV {p['pPvrv']:.0f} oz. VFD at max but capacity is insufficient.")
+    elif p["pTankOz"] < p["pVac"] + 0.5:
+        st.warning(f"⚠️ Tank near vacuum ({p['pTankOz']:.1f} oz). VFD over-pulling — vacuum breaker may admit air.")
+    elif err_oz > 3:
+        st.warning(f"⚠️ Pressure {err_oz:+.1f} oz above setpoint — PLC commanding higher VFD speed to catch up.")
+    elif err_oz < -3:
+        st.info(f"ℹ️ Pressure {err_oz:+.1f} oz below setpoint — PLC reducing VFD speed.")
+    else:
+        st.success(f"✅ Tank pressure {p['pTankOz']:.1f} oz — within ±3 oz of setpoint. Control loop stable.")
 
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Page: Compare Models
+# ─────────────────────────────────────────────────────────────────────────────
+def page_compare():
+    import math as _math
+    import streamlit.components.v1 as components_v1
+
+    st.title("⚖️ Compare VRU Models")
+    st.caption(
+        "Select any 3 models to compare side by side. "
+        "Specs sourced from [flowco-inc.com](https://www.flowco-inc.com/products-services/vapor-recovery/models). "
+        "Live performance is calculated at the current Simulator conditions."
+    )
+
+    model_keys = list(MODELS.keys())
+
+    if "cmp_a" not in st.session_state: st.session_state["cmp_a"] = "VRX25"
+    if "cmp_b" not in st.session_state: st.session_state["cmp_b"] = "FX12V125"
+    if "cmp_c" not in st.session_state: st.session_state["cmp_c"] = "FX17G"
+
+    pc1, pc2, pc3 = st.columns(3)
+    with pc1:
+        sel_a = st.selectbox("Model A", model_keys,
+                             index=model_keys.index(st.session_state["cmp_a"]),
+                             format_func=lambda k: MODEL_SPECS[k]["display_name"] + f"  ({MODEL_SPECS[k]['series']})",
+                             key="cmp_sel_a")
+        st.session_state["cmp_a"] = sel_a
+    with pc2:
+        sel_b = st.selectbox("Model B", model_keys,
+                             index=model_keys.index(st.session_state["cmp_b"]),
+                             format_func=lambda k: MODEL_SPECS[k]["display_name"] + f"  ({MODEL_SPECS[k]['series']})",
+                             key="cmp_sel_b")
+        st.session_state["cmp_b"] = sel_b
+    with pc3:
+        sel_c = st.selectbox("Model C", model_keys,
+                             index=model_keys.index(st.session_state["cmp_c"]),
+                             format_func=lambda k: MODEL_SPECS[k]["display_name"] + f"  ({MODEL_SPECS[k]['series']})",
+                             key="cmp_sel_c")
+        st.session_state["cmp_c"] = sel_c
+
+    sel = [sel_a, sel_b, sel_c]
+    if len(set(sel)) < 3:
+        st.warning("⚠️ Two or more selected models are the same. Change selections to compare distinct units.")
+
+    SLOT_COLORS = ["#4FD1C5", "#F0A227", "#E4572E"]
+
+    st.divider()
+
+    # ── Spec table ────────────────────────────────────────────────────────────
+    sec("Official Specs  (source: flowco-inc.com)")
+
+    hdr_html = '<div class="rrow" style="margin-bottom:6px">'
+    hdr_html += '<span class="lbl" style="min-width:180px">Specification</span>'
+    for i, k in enumerate(sel):
+        sp = MODEL_SPECS[k]
+        hdr_html += (f'<span style="flex:1;text-align:center;color:{SLOT_COLORS[i]};'
+                     f'font-weight:700;font-family:monospace;font-size:0.88rem">'
+                     f'{sp["display_name"]}</span>')
+    hdr_html += '</div>'
+    st.markdown(hdr_html, unsafe_allow_html=True)
+
+    def cmp_row(label, vals, styles=None):
+        styles = styles or ["val", "val", "val"]
+        row = '<div class="rrow">'
+        row += f'<span class="lbl" style="min-width:180px">{label}</span>'
+        for i, v in enumerate(vals):
+            row += f'<span class="{styles[i]}" style="flex:1;text-align:center">{v}</span>'
+        row += '</div>'
+        return row
+
+    def yn(b): return "✅ Yes" if b else "—"
+    def gear(n): return f"{n} choices" if n else "—"
+
+    rows_html = ""
+    rows_html += cmp_row("Series",                [MODEL_SPECS[k]["series"]       for k in sel])
+    rows_html += cmp_row("Nameplate power",        [MODEL_SPECS[k]["hp_label"]     for k in sel])
+    rows_html += cmp_row("Driver",                 [MODEL_SPECS[k]["driver_detail"] for k in sel])
+    rows_html += cmp_row("Electrical supply",      [MODEL_SPECS[k]["motor_voltage"] for k in sel])
+
+    cap_nums   = [MODEL_SPECS[k]["capacity_mscfd"]    for k in sel]
+    pres_nums  = [MODEL_SPECS[k]["max_pressure_psig"] for k in sel]
+    rows_html += cmp_row("Max capacity (MSCFD)",
+        [f"{v:,}" for v in cap_nums],
+        ["good" if v == max(cap_nums) else "val" for v in cap_nums])
+    rows_html += cmp_row("Max discharge pressure (psig)",
+        [str(v) for v in pres_nums],
+        ["amb" if v == max(pres_nums) else "val" for v in pres_nums])
+
+    rows_html += cmp_row("Built-in Vᵢ (nominal)", [f"{MODELS[k]['Vi']:.1f}" for k in sel])
+    rows_html += cmp_row("Gear ratio choices",     [gear(MODEL_SPECS[k]["gear_choices"]) for k in sel])
+    rows_html += cmp_row("Variable Vᵢ option",     [yn(MODEL_SPECS[k]["variable_vi"])    for k in sel])
+    rows_html += cmp_row("Control system",         [MODEL_SPECS[k]["control"]            for k in sel])
+    rows_html += cmp_row("ASME Sec VIII vessels",  [yn(MODEL_SPECS[k]["asme_vessels"])   for k in sel])
+    rows_html += cmp_row("NACE MR0175 option",     [yn(MODEL_SPECS[k]["nace_option"])    for k in sel])
+    rows_html += cmp_row("Typical application",    [MODEL_SPECS[k]["typical_app"]        for k in sel])
+    st.markdown(rows_html, unsafe_allow_html=True)
+
+    src_links = "  ·  ".join(
+        f'<a href="{MODEL_SPECS[k]["url"]}" target="_blank" '
+        f'style="color:{SLOT_COLORS[i]};font-size:0.75rem">'
+        f'{MODEL_SPECS[k]["display_name"]} spec page ↗</a>'
+        for i, k in enumerate(sel)
+    )
+    st.markdown(f'<div style="margin-top:6px;color:#63727F;font-size:0.75rem">Source: {src_links}</div>',
+                unsafe_allow_html=True)
+
+    st.divider()
+
+    # ── Visual comparison ────────────────────────────────────────────────────
+    sec("Visual Comparison")
+    st.caption(
+        "Bars show each model's value as a fraction of the fleet maximum. "
+        "Each metric is its own group of 3 coloured bars — one per selected model. "
+        "▲ = highest among the three selected."
+    )
+
+    # Four metrics, each on its own row-group
+    COMP_METRICS = [
+        ("Max Capacity",          "MSCFD",      [MODEL_SPECS[k]["capacity_mscfd"]    for k in sel], 2000),
+        ("Nameplate Power",       "hp",          [MODELS[k]["hp"]                    for k in sel], 300),
+        ("Max Discharge Pressure","psig",        [MODEL_SPECS[k]["max_pressure_psig"] for k in sel], 350),
+        ("Efficiency (MSCFD/hp)", "MSCFD/hp",   [round(MODEL_SPECS[k]["capacity_mscfd"]/MODELS[k]["hp"],1)
+                                                  for k in sel], round(2000/7.5,1)),
+    ]
+
+    # SVG layout constants
+    MARGIN_L = 20    # left margin
+    LABEL_W  = 170   # metric label column width
+    BAR_MAX  = 280   # maximum bar pixel length
+    VAL_W    = 90    # value text column width
+    SVG_W    = MARGIN_L + LABEL_W + BAR_MAX + VAL_W + 16
+
+    BAR_H    = 16    # height of one bar
+    BAR_GAP  = 2     # gap between bars within a group
+    GROUP_H  = 3 * BAR_H + 2 * BAR_GAP   # height of one 3-bar group
+    TITLE_H  = 17    # height of metric title row
+    SECTION_PAD = 8  # padding below each group before next title
+    SVG_H = len(COMP_METRICS) * (TITLE_H + GROUP_H + SECTION_PAD) + GROUP_H + 20
+
+    cg = (f'<svg viewBox="0 0 {SVG_W} {SVG_H}" xmlns="http://www.w3.org/2000/svg" '
+          f'style="width:100%;background:#0C1218;border:1px solid #1B2530;'
+          f'border-radius:6px;font-family:monospace">')
+
+    yc = 10
+    for m_title, m_unit, m_vals, m_max in COMP_METRICS:
+        best = max(m_vals)
+
+        # Metric title row
+        cg += (f'<text x="{MARGIN_L}" y="{yc+14}" fill="#F0A227" '
+               f'font-size="10" font-weight="700">{m_title}</text>')
+        fleet_str = f"{m_max:,} {m_unit}" if m_unit else str(m_max)
+        cg += (f'<text x="{SVG_W-8}" y="{yc+14}" fill="#3E4E5F" '
+               f'font-size="8" text-anchor="end">fleet max  {fleet_str}</text>')
+        yc += TITLE_H
+
+        for slot_i, k in enumerate(sel):
+            v   = m_vals[slot_i]
+            col = SLOT_COLORS[slot_i]
+            is_best = (v == best)
+            filled  = max(4, int(v / m_max * BAR_MAX))
+            by      = yc + slot_i * (BAR_H + BAR_GAP)
+            bx      = MARGIN_L + LABEL_W
+
+            # Model name label (left column) — include driver type
+            _drv_tag = '(gas)' if MODELS[k]['driver'] == 'gas' else '(electric)'
+            cg += (f'<text x="{MARGIN_L + LABEL_W - 8}" y="{by + BAR_H//2 + 4}" '
+                   f'fill="{col}" font-size="9" font-weight="700" text-anchor="end">'
+                   f'{MODEL_SPECS[k]["display_name"]} {_drv_tag}</text>')
+
+            # Track
+            cg += (f'<rect x="{bx}" y="{by + 3}" width="{BAR_MAX}" height="{BAR_H - 6}" '
+                   f'rx="3" fill="#111820"/>')
+
+            # Filled bar — brighter if best
+            opacity = "0.95" if is_best else "0.60"
+            cg += (f'<rect x="{bx}" y="{by + 3}" width="{filled}" height="{BAR_H - 6}" '
+                   f'rx="3" fill="{col}" opacity="{opacity}"/>')
+
+            # Value label (right of bar)
+            val_str = f"{v:,} {m_unit}" if m_unit else str(v)
+            cg += (f'<text x="{bx + filled + 6}" y="{by + BAR_H//2 + 4}" '
+                   f'fill="{col}" font-size="9">{ val_str }</text>')
+
+            # Best badge
+            if is_best:
+                cg += (f'<text x="{SVG_W - 8}" y="{by + BAR_H//2 + 4}" '
+                       f'fill="{col}" font-size="9" font-weight="700" text-anchor="end">▲</text>')
+
+        yc += GROUP_H + SECTION_PAD
+
+        # Divider between metric groups
+        cg += (f'<line x1="{MARGIN_L}" y1="{yc - 4}" x2="{SVG_W - MARGIN_L}" y2="{yc - 4}" '
+               f'stroke="#1B2530" stroke-width="0.8"/>')
+
+    cg += "</svg>"
+    components_v1.html(f"<div style='background:#0C1218'>{cg}</div>",
+                       height=SVG_H + 32, scrolling=False)
+
+    st.divider()
+
+    # ── Full-fleet comparison chart ────────────────────────────────────────────
+    sec("Full Fleet Comparison — All 12 Models")
+    st.caption(
+        "All 12 Flogistix models shown together. "
+        "Selected models are highlighted; the rest are shown in grey for context. "
+        "Sorted by max capacity."
+    )
+
+    # Build sorted model list by capacity
+    all_keys_sorted = sorted(MODELS.keys(), key=lambda k: MODEL_SPECS[k]["capacity_mscfd"])
+    all_caps   = [MODEL_SPECS[k]["capacity_mscfd"]    for k in all_keys_sorted]
+    all_hp     = [MODELS[k]["hp"]                     for k in all_keys_sorted]
+    all_pres   = [MODEL_SPECS[k]["max_pressure_psig"] for k in all_keys_sorted]
+    all_names  = [MODEL_SPECS[k]["display_name"]      for k in all_keys_sorted]
+    all_series = [MODEL_SPECS[k]["series"]             for k in all_keys_sorted]
+
+    # Colour: slot colour if selected, dim grey otherwise
+    def _fleet_col(k):
+        if k == sel[0]: return SLOT_COLORS[0]
+        if k == sel[1]: return SLOT_COLORS[1]
+        if k == sel[2]: return SLOT_COLORS[2]
+        return "#2E3B49"
+    def _fleet_opacity(k):
+        return "0.9" if k in sel else "0.45"
+
+    NM_ALL = len(all_keys_sorted)
+    FL_LW  = 80    # label width
+    FL_BW  = 340   # bar max width
+    FL_RH  = 16    # row height
+    FL_GAP = 2     # gap between rows
+    FL_TH  = 15    # title height per metric
+    METRICS_FL = [
+        ("Max Capacity (MSCFD)", all_caps,  2000),
+        ("Nameplate Power (hp)", all_hp,    300),
+    ]
+    FL_SVW   = FL_LW + FL_BW + 80
+    FL_BLOCK = FL_TH + NM_ALL*(FL_RH+FL_GAP) + 14
+    FL_TOTAL = len(METRICS_FL) * (FL_BLOCK + 12) + 16
+
+    fs = (f'<svg viewBox="0 0 {FL_SVW} {FL_TOTAL}" xmlns="http://www.w3.org/2000/svg" '
+          f'style="width:100%;background:#0C1218;border:1px solid #1B2530;'
+          f'border-radius:6px;font-family:monospace">')
+    fyc = 10
+    for m_title, m_vals, m_max in METRICS_FL:
+        fs += (f'<text x="6" y="{fyc+12}" fill="#F0A227" font-size="9" '
+               f'font-weight="700">{m_title}</text>')
+        fs += (f'<text x="{FL_SVW-6}" y="{fyc+12}" fill="#3E4E5F" font-size="8" '
+               f'text-anchor="end">max {m_max:,}</text>')
+        fyc += FL_TH
+        for ki, k in enumerate(all_keys_sorted):
+            v    = m_vals[ki]
+            col  = _fleet_col(k)
+            op   = _fleet_opacity(k)
+            fill = max(3, int(v / m_max * FL_BW))
+            by   = fyc + ki*(FL_RH+FL_GAP)
+            # Track
+            fs += (f'<rect x="{FL_LW}" y="{by+4}" width="{FL_BW}" height="{FL_RH-6}" '
+                   f'rx="2" fill="#111820"/>')
+            # Bar
+            fs += (f'<rect x="{FL_LW}" y="{by+4}" width="{fill}" height="{FL_RH-6}" '
+                   f'rx="2" fill="{col}" opacity="{op}"/>')
+            # Label
+            fw = "700" if k in sel else "400"
+            _drv2 = '(gas)' if MODELS[all_keys_sorted[ki]]['driver']=='gas' else '(elec)'
+            fs += (f'<text x="{FL_LW-5}" y="{by+FL_RH//2+3}" fill="{col}" '
+                   f'font-size="8" font-weight="{fw}" text-anchor="end">'
+                   f'{all_names[ki]} {_drv2}</text>')
+            # Value
+            fs += (f'<text x="{FL_LW+fill+4}" y="{by+FL_RH//2+3}" fill="{col}" '
+                   f'font-size="8" opacity="{op}">{v:,}</text>')
+            # Selected badge
+            if k in sel:
+                slot_i = sel.index(k)
+                badge_x = FL_LW + FL_BW + 10
+                fs += (f'<rect x="{badge_x}" y="{by+3}" width="28" height="{FL_RH-6}" '
+                       f'rx="2" fill="{SLOT_COLORS[slot_i]}" opacity="0.2"/>')
+                lbl = ["A","B","C"][slot_i]
+                fs += (f'<text x="{badge_x+14}" y="{by+FL_RH//2+3}" fill="{SLOT_COLORS[slot_i]}" '
+                       f'font-size="8" font-weight="700" text-anchor="middle">{lbl}</text>')
+        fyc += NM_ALL*(FL_RH+FL_GAP) + 14
+        fs += (f'<line x1="6" y1="{fyc}" x2="{FL_SVW-6}" y2="{fyc}" '
+               f'stroke="#1E2E3E" stroke-width="0.8"/>')
+        fyc += 12
+    fs += "</svg>"
+    components_v1.html(f"<div style='background:#0C1218'>{fs}</div>",
+                       height=FL_TOTAL+12, scrolling=True)
+
+    st.divider()
+
+    # ── Pros / cons / best-fit use cases ──────────────────────────────────────
+    sec("When to Choose Each Model")
+
+    # Static lookup — derived from confirmed flowco-inc.com specs + field logic
+    USE_CASES = {
+        "VRX7":     {
+            "best_for":  "Marginal / stripper wells, <50 bbl/d oil, minimal vapor. Lowest capital/rental cost in the fleet.",
+            "strengths": ["Smallest footprint — fits tight locations", "Lowest power draw (7.5 hp)", "Full Logix PLC + VFD on a micro-unit", "Easy to relocate as wells decline"],
+            "watch_out": ["Max 40 MSCFD — oversaturates quickly on active wells", "230 psig ceiling — can't reach high-pressure sales lines", "No gear ratio choices — limited flexibility"],
+        },
+        "VRX15":    {
+            "best_for":  "Low-production wells with 40–75 MSCFD vapor load. Step up from VRX7 without moving to a larger skid.",
+            "strengths": ["Same small footprint as VRX7", "Doubles capacity at modest HP increase", "Electric — no fuel cost, no methane number concern"],
+            "watch_out": ["Still capped at 230 psig", "Not suited for multi-well batteries", "No published gear ratio flexibility"],
+        },
+        "VRX25":    {
+            "best_for":  "Marginal wells generating up to 170 MSCFD. Best compact option before stepping into the FX electric series.",
+            "strengths": ["170 MSCFD at only 25 hp — very efficient for the size", "230 psig — adequate for most low-pressure gathering", "VFD + Logix included"],
+            "watch_out": ["Tops out at 230 psig — not for high-pressure sales", "Jump to FX10V75 is large — no intermediate option"],
+        },
+        "FX10V75":  {
+            "best_for":  "Mid-volume electric service, 200–450 MSCFD. Most compact 350 psig electric unit in the fleet.",
+            "strengths": ["350 psig — handles high-pressure sales lines", "75 hp electric — no fuel burn, no engine maintenance", "Compact LeRoi compressor design"],
+            "watch_out": ["No published gear choices — less flexible than FX12+", "If load exceeds 450 MSCFD, next step is a significant jump"],
+        },
+        "FX12V125": {
+            "best_for":  "Workhorse mid-to-high volume electric. 22 gear ratio choices make it adaptable to wide pressure range variation.",
+            "strengths": ["22 gear ratio options — most flexible in series", "75 or 125 hp motor options for the same frame", "850 MSCFD at 350 psig — covers most mid-size batteries", "Integrated gear housing simplifies maintenance"],
+            "watch_out": ["Larger footprint than FX10V75", "No variable Vᵢ — efficiency drops if system ratio drifts far from design"],
+        },
+        "FX17V150": {
+            "best_for":  "High-volume electric. Active multi-well batteries, pad drilling sites. Variable Vᵢ handles changing pressure ratios.",
+            "strengths": ["Variable Vᵢ — adapts as reservoir pressure declines", "ASME Sec VIII vessels — code-stamp required projects", "1,200 MSCFD at 350 psig", "17 gear choices"],
+            "watch_out": ["150 hp requires substantial power service on remote pads", "Higher rental cost than smaller units"],
+        },
+        "FX20V300": {
+            "best_for":  "Largest electric unit. High-rate pads, large tank batteries, facilities with grid power available.",
+            "strengths": ["2,000 MSCFD — maximum capacity in fleet", "300 hp electric — no fuel parasitic load", "13 gear choices for wide operating range"],
+            "watch_out": ["300 hp demands significant electrical infrastructure", "Oversized for anything under ~800 MSCFD — efficiency penalty", "Largest physical footprint"],
+        },
+        "FX8G":     {
+            "best_for":  "Remote low-production sites without grid power. Budget-conscious operations. 150 MSCFD / 230 psig ceiling.",
+            "strengths": ["No electricity required — fully self-contained", "Lowest-cost entry into gas-engine FX series", "Compact footprint for a gas unit"],
+            "watch_out": ["230 psig only — not for high-pressure gathering", "Gas engine burns recovered product (parasitic loss)", "Methane number risk on rich vapour streams"],
+        },
+        "FX10G":    {
+            "best_for":  "Remote mid-volume sites (up to 450 MSCFD) without power. Same capacity as FX10V75 but fuel-fired.",
+            "strengths": ["350 psig — full pressure capability off-grid", "92 hp Cummins-class engine", "Compact LeRoi compressor"],
+            "watch_out": ["Engine fuel = parasitic loss on recovered gas", "Methane number limits on rich C4+ streams", "Engine maintenance vs electric simplicity"],
+        },
+        "FX12G":    {
+            "best_for":  "Remote mid-to-high volume (750 MSCFD) where grid power isn't available. Same 22-gear flexibility as FX12V125.",
+            "strengths": ["22 gear ratio choices — highly adaptable", "750 MSCFD off-grid at 350 psig", "92 or 135 hp engine options"],
+            "watch_out": ["Rich vapour may cause methane number issues at higher hp rating", "Engine fuel cost reduces net gas revenue"],
+        },
+        "FX17G":    {
+            "best_for":  "Large remote batteries needing 1,200 MSCFD without power infrastructure. Variable Vᵢ a major advantage as reservoir declines.",
+            "strengths": ["Cummins G855C188 — well-proven field engine", "Variable Vᵢ — maintains efficiency across pressure ratio changes", "17 gear choices", "Class I Div 2 Logix + VFD"],
+            "watch_out": ["188 hp gas engine has meaningful fuel parasitic cost", "Engine service intervals on remote locations", "Methane number monitoring required"],
+        },
+        "FX20G":    {
+            "best_for":  "Maximum throughput (2,000 MSCFD) in off-grid locations. Replaces two smaller units on large remote batteries.",
+            "strengths": ["2,000 MSCFD — fleet maximum, gas-driven", "13 gear choices", "Eliminates need for multiple smaller units"],
+            "watch_out": ["276 hp engine has the highest fuel parasitic in the fleet", "Largest gas-engine footprint", "Methane number management critical at this scale"],
+        },
+    }
+
+    use_cols = st.columns(3)
+    for col_i, k in enumerate(sel):
+        uc  = USE_CASES.get(k, {})
+        sp  = MODEL_SPECS[k]
+        col = SLOT_COLORS[col_i]
+        with use_cols[col_i]:
+            st.markdown(
+                f'<div style="border:1px solid {col};border-radius:6px;'
+                f'padding:12px 14px;background:#0E1620;margin-bottom:4px">'
+                f'<div style="color:{col};font-family:monospace;font-weight:700;'
+                f'font-size:1rem;margin-bottom:4px">{sp["display_name"]}</div>'
+                f'<div style="color:#8A9AA8;font-size:0.78rem;margin-bottom:8px">'
+                f'{sp["series"]}  ·  {sp["hp_label"]}  ·  {sp["capacity_mscfd"]} MSCFD</div>'
+                f'<div style="color:#F0A227;font-size:0.75rem;font-weight:600;'
+                f'margin-bottom:4px">BEST FOR</div>'
+                f'<div style="color:#E6EDF3;font-size:0.82rem;margin-bottom:10px">'
+                f'{uc.get("best_for","—")}</div>'
+                f'<div style="color:#6FBF73;font-size:0.75rem;font-weight:600;'
+                f'margin-bottom:4px">✅ STRENGTHS</div>'
+                + "".join(
+                    f'<div style="color:#A8D8A8;font-size:0.80rem;padding:1px 0">'
+                    f'· {s}</div>'
+                    for s in uc.get("strengths", [])
+                ) +
+                f'<div style="color:#E4572E;font-size:0.75rem;font-weight:600;'
+                f'margin-top:8px;margin-bottom:4px">⚠️ WATCH OUT FOR</div>'
+                + "".join(
+                    f'<div style="color:#F5B9A6;font-size:0.80rem;padding:1px 0">'
+                    f'· {w}</div>'
+                    for w in uc.get("watch_out", [])
+                ) +
+                f'</div>',
+                unsafe_allow_html=True
+            )
+
+    st.divider()
+
+    # ── Live performance at current Simulator conditions ──────────────────────
+
+    sec("Live Performance at Current Simulator Conditions")
+    st.caption(
+        "Each model is solved with the current Simulator parameters "
+        f"(sep {p['pSep']} psig · tank {p['pTankOz']:.1f} oz · "
+        f"sales {p['pSales']} psig · {p['qLiq']:,} bbl/d). "
+        "This shows how each unit would actually perform on this exact well."
+    )
+
+    results = {}
+    for k in sel:
+        pp = dict(p)
+        pp["model"] = k
+        M = MODELS[k]
+        pp["disp"]   = M["disp"]
+        pp["Vi"]     = M["Vi"]
+        pp["oilGpm"] = M["oilGpm"]
+        try:
+            results[k] = solve(pp, feed_pct, p["use_real"])
+        except Exception:
+            results[k] = None
+
+    perf_hdr = '<div class="rrow" style="margin-bottom:6px">'
+    perf_hdr += '<span class="lbl" style="min-width:180px">Performance output</span>'
+    for i, k in enumerate(sel):
+        sp = MODEL_SPECS[k]
+        perf_hdr += (f'<span style="flex:1;text-align:center;color:{SLOT_COLORS[i]};'
+                     f'font-weight:700;font-family:monospace;font-size:0.88rem">'
+                     f'{sp["display_name"]}</span>')
+    perf_hdr += '</div>'
+    st.markdown(perf_hdr, unsafe_allow_html=True)
+
+    def prow(label, vals, styles=None):
+        styles = styles or ["val"] * 3
+        row = '<div class="rrow">'
+        row += f'<span class="lbl" style="min-width:180px">{label}</span>'
+        for i, v in enumerate(vals):
+            row += f'<span class="{styles[i]}" style="flex:1;text-align:center">{v}</span>'
+        row += '</div>'
+        return row
+
+    def safe(k, fn, default="—"):
+        try:
+            return fn(results[k]) if results[k] else default
+        except Exception:
+            return default
+
+    perf_rows = ""
+    gen_val = results[sel[0]]["qGen"] if results[sel[0]] else None
+
+    def cap_style(k):
+        if not results[k] or gen_val is None: return "val"
+        cap = results[k]["qCap"]
+        if cap >= gen_val:          return "good"
+        if cap >= gen_val * 0.80:   return "amb"
+        return "hot"
+
+    perf_rows += prow("Capacity (MSCFD)",
+        [safe(k, lambda r: f"{f(r['qCap'],1)} MSCFD") for k in sel],
+        [cap_style(k) for k in sel])
+    perf_rows += prow("Flow vs nameplate (%)",
+        [safe(k, lambda r: f"{f(r['flowPct'],1)} %") for k in sel])
+    perf_rows += prow("Gas generated (MSCFD)",
+        [safe(k, lambda r: f"{f(r['qGen'],1)} MSCFD") for k in sel])
+    perf_rows += prow("Venting (MSCFD)",
+        [safe(k, lambda r: f"{f(r['qVent'],2)} MSCFD") for k in sel],
+        ["hot" if (results[k] and results[k].get("qVent",0)>0.05) else "good" for k in sel])
+
+    hp_styles = [
+        "hot" if (results[k] and results[k].get("hpPct",0)>100)
+        else ("amb" if (results[k] and results[k].get("hpPct",0)>85) else "good")
+        for k in sel
+    ]
+    perf_rows += prow("Shaft power (BHP)",
+        [safe(k, lambda r: f"{f(r['bhp'],0)} BHP") for k in sel], hp_styles)
+    perf_rows += prow("Driver load (%)",
+        [safe(k, lambda r: f"{f(r['hpPct'],0)} %") for k in sel], hp_styles)
+    perf_rows += prow("Discharge temp (°F)",
+        [safe(k, lambda r: f"{f(R2F(r['td']),0)} °F") for k in sel],
+        ["hot" if (results[k] and R2F(results[k].get("td",0))>340) else "good" for k in sel])
+    perf_rows += prow("Specific power (BHP/MMSCFD)",
+        [safe(k, lambda r: f"{f(r['specPower'],0)}") for k in sel])
+    perf_rows += prow("Condensate (bbl/d)",
+        [safe(k, lambda r: f"{f(r['nglBbl'],2)}") for k in sel])
+    perf_rows += prow("Net to sales (MSCFD)",
+        [safe(k, lambda r: f"{f(r['qNet'],1)}") for k in sel])
+
+    margin_nums = [results[k]["netDay"] if results[k] else None for k in sel]
+    best_margin = max((v for v in margin_nums if v is not None), default=None)
+    perf_rows += prow("Net margin ($/day)",
+        [safe(k, lambda r: f"${f(r['netDay'],0)}/d") for k in sel],
+        [("good" if (results[k] and results[k]["netDay"]==best_margin)
+          else ("hot" if (results[k] and results[k]["netDay"]<0) else "val"))
+         for k in sel])
+
+    mn_vals, mn_styles = [], []
+    for k in sel:
+        if MODELS[k]["driver"] == "gas" and results[k]:
+            mn = results[k].get("mn", 100)
+            mn_vals.append(f"{f(mn,1)}")
+            mn_styles.append("hot" if mn < p["mnReq"] else "good")
+        else:
+            mn_vals.append("N/A (electric)")
+            mn_styles.append("val")
+    perf_rows += prow(f"Methane number (req. ≥{p['mnReq']})", mn_vals, mn_styles)
+    st.markdown(perf_rows, unsafe_allow_html=True)
+
+    st.divider()
+    st.caption("**Per-model alarm summary at current conditions**")
+    alarm_cols = st.columns(3)
+    for i, k in enumerate(sel):
+        with alarm_cols[i]:
+            R_k = results[k]
+            sp  = MODEL_SPECS[k]
+            st.markdown(
+                f'<div style="color:{SLOT_COLORS[i]};font-weight:700;'
+                f'font-family:monospace;font-size:0.88rem;margin-bottom:6px">'
+                f'{sp["display_name"]}</div>',
+                unsafe_allow_html=True
+            )
+            if R_k is None:
+                st.markdown(alarm_html("⚠️ Solver error", "warn"), unsafe_allow_html=True)
+                continue
+            alarms = []
+            if R_k["qVent"] > 0.05:
+                alarms.append(alarm_html(
+                    f"🚨 Venting {f(R_k['qVent'],2)} MSCFD — ${f(R_k['lostDay'],0)}/d lost", "red"))
+            if R_k["hpPct"] > 100:
+                alarms.append(alarm_html(
+                    f"⚠️ Overload — {f(R_k['bhp'],0)} BHP / {MODELS[k]['hp']} hp", "warn"))
+            if R2F(R_k["td"]) > 340:
+                alarms.append(alarm_html(f"⚠️ Disch. temp {f(R2F(R_k['td']),0)} °F", "warn"))
+            if MODELS[k]["driver"] == "gas" and R_k["mn"] < p["mnReq"]:
+                alarms.append(alarm_html(f"⚠️ MN {f(R_k['mn'],1)} < req. {p['mnReq']}", "warn"))
+            if p["pTankOz"] < p["pVac"] + 0.5:
+                alarms.append(alarm_html("⚠️ Tank near vacuum", "warn"))
+            if not alarms:
+                alarms.append(alarm_html("✅ All systems normal", "ok"))
+            for a in alarms:
+                st.markdown(a, unsafe_allow_html=True)
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Router
@@ -2616,5 +3480,7 @@ elif page == "lessons":
     page_lessons()
 elif page == "glossary":
     page_glossary()
+elif page == "compare":
+    page_compare()
 else:
     page_dashboard()
